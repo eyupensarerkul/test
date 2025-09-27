@@ -1,472 +1,245 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Material-ish Saat Uygulaması — Kronometre & Timer & Alarm</title>
-
-  <!-- Roboto + Material Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <style>
-    :root{
-      --bg:#0f1720;
-      --card:#0b1220;
-      --accent:#4caf50;
-      --muted:#9aa4ad;
-      --glass: rgba(255,255,255,0.03);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Roboto, system-ui, -apple-system, "Segoe UI", Helvetica, Arial;
-      min-height:100vh;
-      background:linear-gradient(135deg,#071021 0%, #0f1720 60%);
-      color:#e6eef6;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:28px;
-    }
-
-    .app {
-      width:100%;
-      max-width:920px;
-      display:grid;
-      grid-template-columns: 1fr 360px;
-      gap:20px;
-      align-items:start;
-    }
-
-    header.app-head{
-      grid-column: 1 / -1;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:8px;
-    }
-    .brand {
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .brand .logo {
-      width:44px;height:44px;border-radius:8px;
-      background:linear-gradient(135deg,var(--accent),#2ea44f);
-      display:grid;place-items:center;font-weight:700;color:#072018;
-      box-shadow:0 6px 18px rgba(46,124,50,0.18);
-    }
-    h1{font-size:18px;margin:0}
-    p.lead{margin:0;color:var(--muted);font-size:13px}
-
-    /* Cards */
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.04);
-      padding:18px;
-      border-radius:12px;
-      box-shadow: 0 6px 20px rgba(2,6,23,0.6);
-      overflow:hidden;
-      transform: translateY(10px);
-      opacity:0;
-      animation: slideUp .45s cubic-bezier(.2,.9,.2,1) forwards;
-    }
-    /* staggering */
-    .card:nth-child(1){ animation-delay: .05s}
-    .card:nth-child(2){ animation-delay: .12s}
-    .card:nth-child(3){ animation-delay: .18s}
-    .card:nth-child(4){ animation-delay: .24s}
-
-    @keyframes slideUp{
-      to { transform:none; opacity:1 }
-    }
-
-    .clock-big{
-      font-size:56px;
-      font-weight:700;
-      letter-spacing:1px;
-      text-align:center;
-      display:block;
-      padding:8px 6px;
-    }
-    .clock-date{ text-align:center; color:var(--muted); margin-top:6px; font-size:14px; }
-
-    /* pulse when updated */
-    .pulse {
-      animation: pulseScale .28s ease;
-    }
-    @keyframes pulseScale {
-      0%{ transform: scale(1); opacity:1; filter:blur(0) }
-      40%{ transform: scale(1.06); opacity:1 }
-      100%{ transform: scale(1); opacity:1 }
-    }
-
-    .controls { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; align-items:center }
-    .btn {
-      background:var(--accent);
-      color:#062016;
-      border:none;
-      padding:8px 12px;
-      border-radius:8px;
-      cursor:pointer;
-      font-weight:600;
-      box-shadow:0 6px 14px rgba(46,124,50,0.16);
-    }
-    .btn.ghost{ background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04); box-shadow:none }
-    .btn.warn{ background:#ffb020; color:#2b1b00 }
-    .small { padding:6px 10px; font-size:14px }
-
-    label.smalltxt{ display:block; color:var(--muted); font-size:13px; margin-bottom:6px }
-
-    input[type="number"], input[type="time"], input[type="text"]{
-      width:100%;
-      padding:8px 10px;
-      border-radius:8px;
-      border:1px solid rgba(255,255,255,0.04);
-      background:var(--glass);
-      color:inherit;
-      outline:none;
-    }
-    .muted{ color:var(--muted); font-size:13px }
-
-    /* layout right column */
-    .right { display:flex; flex-direction:column; gap:14px }
-
-    footer.note { grid-column:1 / -1; color:var(--muted); font-size:13px; text-align:center; margin-top:8px }
-
-    /* responsive */
-    @media (max-width:880px){
-      .app{ grid-template-columns: 1fr; }
-      .right{ order:2 }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Material You Expressive Clock</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --expressive-blue:#1E88E5;
+  --expressive-purple:#8E24AA;
+  --expressive-orange:#F4511E;
+  --bg-dark:#121212;
+  --bg-light:#FAFAFA;
+  --card-bg: rgba(255,255,255,0.05);
+  --card-radius:16px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:Roboto, sans-serif;
+  min-height:100vh;
+  background: var(--bg-dark);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:24px;
+}
+.container{
+  width:100%;
+  max-width:900px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+}
+.card{
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  padding:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.6);
+  opacity:0;
+  transform: translateY(12px);
+  animation: slideUp 0.5s forwards;
+}
+.card:nth-child(1){animation-delay:0.05s;}
+.card:nth-child(2){animation-delay:0.12s;}
+.card:nth-child(3){animation-delay:0.18s;}
+.card:nth-child(4){animation-delay:0.24s;}
+@keyframes slideUp{
+  to{opacity:1; transform: translateY(0);}
+}
+h2{margin:0 0 8px 0;}
+.time-display{
+  font-size:3rem;
+  font-weight:700;
+  text-align:center;
+  margin:12px 0;
+}
+.small-text{font-size:13px;color: #ccc;}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+button{
+  border:none;
+  padding:10px 16px;
+  border-radius:12px;
+  font-weight:500;
+  cursor:pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+button:hover{transform: scale(1.05);}
+.btn-blue{background: var(--expressive-blue); color:white;}
+.btn-purple{background: var(--expressive-purple); color:white;}
+.btn-orange{background: var(--expressive-orange); color:white;}
+input[type="number"], input[type="time"]{
+  width:100%;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color:white;
+  font-size:14px;
+  outline:none;
+  margin-top:4px;
+}
+input::placeholder{color:rgba(255,255,255,0.5);}
+.pulse{
+  animation: pulseAnim 0.3s ease;
+}
+@keyframes pulseAnim{
+  0%{transform: scale(1);}
+  50%{transform: scale(1.05);}
+  100%{transform: scale(1);}
+}
+</style>
 </head>
 <body>
-  <div class="app">
-
-    <header class="app-head">
-      <div class="brand">
-        <div class="logo">S</div>
-        <div>
-          <h1>Material Clock — Kankam</h1>
-          <p class="lead">Saat, Kronometre, Zamanlayıcı ve Alarm — Çalışır hâliyle</p>
-        </div>
-      </div>
-
-      <div>
-        <button class="btn small" id="darkToggle" title="Dark toggle (estetik)">💡 Tema</button>
-      </div>
-    </header>
-
-    <!-- LEFT: main widgets -->
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <!-- Clock card -->
-      <section class="card">
-        <div id="mainClock" aria-live="polite">
-          <div id="timeDisplay" class="clock-big">--:--:--</div>
-          <div id="dateDisplay" class="clock-date">Loading...</div>
-        </div>
-      </section>
-
-      <!-- Stopwatch card -->
-      <section class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:600">⏱ Kronometre</div>
-            <div class="muted" style="font-size:13px">Yüksek hassasiyet — pause & resume destekli</div>
-          </div>
-          <div id="swStatus" class="muted">Durum: <span>Hazır</span></div>
-        </div>
-
-        <div style="margin-top:12px; font-family:monospace; font-size:28px; text-align:center" id="stopwatchDisplay">00:00:00</div>
-
-        <div class="controls">
-          <button class="btn" id="swStart">Başlat</button>
-          <button class="btn ghost" id="swPause">Duraklat</button>
-          <button class="btn ghost" id="swReset">Sıfırla</button>
-        </div>
-      </section>
-
-      <!-- Timer card -->
-      <section class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:600">⏲ Zamanlayıcı</div>
-            <div class="muted" style="font-size:13px">Dakika + Saniye gir, başlat — bitince uyarı</div>
-          </div>
-          <div id="timerStatus" class="muted">Kalan: <strong id="timerDisplay">00:00</strong></div>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <div style="flex:1">
-            <label class="smalltxt">Dakika</label>
-            <input id="timerMinutes" type="number" min="0" placeholder="Dakika (örn. 1)">
-          </div>
-          <div style="width:120px">
-            <label class="smalltxt">Saniye</label>
-            <input id="timerSeconds" type="number" min="0" max="59" placeholder="Saniye (0-59)">
-          </div>
-        </div>
-
-        <div class="controls" style="margin-top:10px">
-          <button class="btn" id="timerStart">Başlat</button>
-          <button class="btn ghost" id="timerPause">Durdur</button>
-          <button class="btn ghost" id="timerReset">Sıfırla</button>
-        </div>
-      </section>
-    </div>
-
-    <!-- RIGHT column -->
-    <aside class="right">
-      <!-- Alarm card -->
-      <section class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:600">⏰ Alarm</div>
-            <div class="muted" style="font-size:13px">Saat seç — tam dakika geldiğinde uyarır</div>
-          </div>
-          <span class="material-icons" style="opacity:.9">alarm</span>
-        </div>
-
-        <div style="margin-top:12px">
-          <label class="smalltxt">Alarm saati</label>
-          <input id="alarmTime" type="time">
-        </div>
-
-        <div class="controls" style="margin-top:10px">
-          <button class="btn" id="alarmSet">Kur</button>
-          <button class="btn ghost" id="alarmClear">Kapat</button>
-        </div>
-
-        <div style="margin-top:10px" class="muted">Durum: <span id="alarmStatus">Kurulmadı</span></div>
-        <div style="margin-top:8px" class="muted" id="ringActions" hidden>
-          <button class="btn warn small" id="stopRing">Alarmı Durdur</button>
-        </div>
-      </section>
-
-      <!-- small about -->
-      <section class="card" style="text-align:center">
-        <div style="font-weight:600;margin-bottom:8px">Nasıl test edilir?</div>
-        <div class="muted" style="font-size:13px;line-height:1.4">
-          • Alarmı test için bir dakika sonrası saat/dakikayı ayarla.<br>
-          • Timer için 0 dakika 5 saniye gir, Start'a bas.<br>
-          • Kronometre Start, sonra Pause, sonra Resume ile dene.
-        </div>
-      </section>
-    </aside>
-
-    <footer class="note">Hazır — Herhangi bir hata olursa söyle, hallederiz kanka 😎</footer>
+<div class="container">
+  <!-- Saat -->
+  <div class="card">
+    <h2>Saat</h2>
+    <div class="time-display" id="clockDisplay">--:--:--</div>
+    <div class="small-text" id="dateDisplay">Yükleniyor...</div>
   </div>
 
-  <script>
-    /* ---------- Utility ---------- */
-    const $ = (id)=> document.getElementById(id);
-    const pad = (v, n=2) => String(v).padStart(n,'0');
+  <!-- Kronometre -->
+  <div class="card">
+    <h2>Kronometre</h2>
+    <div class="time-display" id="stopwatchDisplay">00:00:00</div>
+    <div class="small-text" id="swStatus">Durum: Hazır</div>
+    <div class="controls">
+      <button class="btn-blue" id="swStart">Başlat</button>
+      <button class="btn-purple" id="swPause">Durdur</button>
+      <button class="btn-orange" id="swReset">Sıfırla</button>
+    </div>
+  </div>
 
-    /* ---------- Clock ---------- */
-    const timeDisplay = $('timeDisplay');
-    const dateDisplay = $('dateDisplay');
+  <!-- Zamanlayıcı -->
+  <div class="card">
+    <h2>Zamanlayıcı</h2>
+    <div style="display:flex;gap:8px;">
+      <div style="flex:1">
+        <label class="small-text">Dakika</label>
+        <input type="number" id="timerMinutes" placeholder="0">
+      </div>
+      <div style="width:80px">
+        <label class="small-text">Saniye</label>
+        <input type="number" id="timerSeconds" placeholder="0">
+      </div>
+    </div>
+    <div class="time-display" id="timerDisplay">00:00</div>
+    <div class="controls">
+      <button class="btn-blue" id="timerStart">Başlat</button>
+      <button class="btn-purple" id="timerPause">Durdur</button>
+      <button class="btn-orange" id="timerReset">Sıfırla</button>
+    </div>
+  </div>
 
-    function updateClock(){
-      const now = new Date();
-      timeDisplay.textContent = now.toLocaleTimeString('tr-TR', {hour12:false});
-      dateDisplay.textContent = now.toLocaleDateString('tr-TR');
-      // pulse animation
-      timeDisplay.classList.remove('pulse');
-      void timeDisplay.offsetWidth;
-      timeDisplay.classList.add('pulse');
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+  <!-- Alarm -->
+  <div class="card">
+    <h2>Alarm</h2>
+    <label class="small-text">Saat</label>
+    <input type="time" id="alarmTime">
+    <div class="controls" style="margin-top:8px">
+      <button class="btn-blue" id="alarmSet">Kur</button>
+      <button class="btn-orange" id="alarmClear">Kapat</button>
+    </div>
+    <div class="small-text">Durum: <span id="alarmStatus">Kurulmadı</span></div>
+  </div>
+</div>
 
-    /* ---------- Stopwatch (high-precision) ---------- */
-    const swDisplay = $('stopwatchDisplay');
-    const swStatus = $('swStatus').querySelector('span');
+<script>
+// Saat
+const clockDisplay = document.getElementById('clockDisplay');
+const dateDisplay = document.getElementById('dateDisplay');
+function updateClock(){
+  const now = new Date();
+  clockDisplay.textContent = now.toLocaleTimeString('tr-TR', {hour12:false});
+  dateDisplay.textContent = now.toLocaleDateString('tr-TR');
+  clockDisplay.classList.remove('pulse');
+  void clockDisplay.offsetWidth;
+  clockDisplay.classList.add('pulse');
+}
+setInterval(updateClock,1000);
+updateClock();
 
-    let swInterval = null;
-    let swStartAt = 0;     // timestamp when last started
-    let swElapsed = 0;     // accumulated elapsed ms while paused
+// Kronometre
+let swInterval=null, swStart=0, swElapsed=0;
+const swDisplay=document.getElementById('stopwatchDisplay');
+const swStatus=document.getElementById('swStatus');
+function msToHMS(ms){
+  const t=Math.floor(ms/1000);
+  const h=Math.floor(t/3600);
+  const m=Math.floor((t%3600)/60);
+  const s=t%60;
+  return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+function swTick(){
+  const now=Date.now();
+  swDisplay.textContent = msToHMS((now-swStart)+swElapsed);
+}
+document.getElementById('swStart').addEventListener('click',()=>{
+  if(swInterval) return;
+  swStart=Date.now();
+  swInterval=setInterval(swTick,100);
+  swStatus.textContent='Durum: Çalışıyor';
+  swTick();
+});
+document.getElementById('swPause').addEventListener('click',()=>{
+  if(!swInterval) return;
+  clearInterval(swInterval);
+  swInterval=null;
+  swElapsed+=(Date.now()-swStart);
+  swStatus.textContent='Durum: Duraklatıldı';
+});
+document.getElementById('swReset').addEventListener('click',()=>{
+  clearInterval(swInterval); swInterval=null; swStart=0; swElapsed=0;
+  swDisplay.textContent='00:00:00';
+  swStatus.textContent='Durum: Hazır';
+});
 
-    function msToHMS(ms){
-      const totalSec = Math.floor(ms/1000);
-      const h = Math.floor(totalSec / 3600);
-      const m = Math.floor((totalSec % 3600) / 60);
-      const s = totalSec % 60;
-      return `${pad(h)}:${pad(m)}:${pad(s)}`;
-    }
-
-    function swTick(){
-      const now = Date.now();
-      const elapsed = (now - swStartAt) + swElapsed;
-      swDisplay.textContent = msToHMS(elapsed);
-    }
-
-    $('swStart').addEventListener('click', ()=>{
-      if (swInterval) return; // already running
-      swStartAt = Date.now();
-      swInterval = setInterval(swTick, 100); // 100ms tick for smoothness
-      swStatus.textContent = 'Çalışıyor';
-      // immediate tick
-      swTick();
-    });
-
-    $('swPause').addEventListener('click', ()=>{
-      if (!swInterval) return;
-      clearInterval(swInterval);
-      swInterval = null;
-      swElapsed = (Date.now() - swStartAt) + swElapsed;
-      swStatus.textContent = 'Duraklatıldı';
-    });
-
-    $('swReset').addEventListener('click', ()=>{
-      clearInterval(swInterval);
-      swInterval = null;
-      swStartAt = 0;
-      swElapsed = 0;
-      swDisplay.textContent = '00:00:00';
-      swStatus.textContent = 'Hazır';
-    });
-
-    /* ---------- Timer ---------- */
-    const timerDisplay = $('timerDisplay');
-    let timerInterval = null;
-    let timerRemaining = 0; // seconds
-
-    function formatTimer(sec){
-      const m = Math.floor(sec/60);
-      const s = sec % 60;
-      return `${pad(m)}:${pad(s)}`;
-    }
-
-    function updateTimerUI(){
-      $('timerStatus').querySelector('strong').textContent = formatTimer(timerRemaining);
-      timerDisplay.textContent = formatTimer(timerRemaining);
-    }
-
-    $('timerStart').addEventListener('click', ()=>{
-      if (timerInterval) return; // already running
-      // if remaining is zero, read inputs
-      if (timerRemaining <= 0){
-        const mins = parseInt($('timerMinutes').value)||0;
-        const secs = parseInt($('timerSeconds').value)||0;
-        timerRemaining = Math.max(0, mins*60 + secs);
-      }
-      if (timerRemaining <= 0) return; // nothing to start
-      updateTimerUI();
-      timerInterval = setInterval(()=>{
-        timerRemaining--;
-        updateTimerUI();
-        if (timerRemaining <= 0){
-          clearInterval(timerInterval);
-          timerInterval = null;
-          alarmBeep(1800, 440);
-          alert('⏱ Zamanlayıcı bitti!');
-        }
-      }, 1000);
-    });
-
-    $('timerPause').addEventListener('click', ()=>{
-      if (!timerInterval) return;
-      clearInterval(timerInterval);
-      timerInterval = null;
-    });
-
-    $('timerReset').addEventListener('click', ()=>{
-      clearInterval(timerInterval);
-      timerInterval = null;
-      timerRemaining = 0;
-      updateTimerUI();
-    });
-
+// Timer
+let timerInterval=null, timerRemaining=0;
+const timerDisplay=document.getElementById('timerDisplay');
+function formatTimer(sec){ const m=Math.floor(sec/60); const s=sec%60; return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;}
+function updateTimerUI(){timerDisplay.textContent=formatTimer(timerRemaining);}
+document.getElementById('timerStart').addEventListener('click',()=>{
+  if(timerInterval) return;
+  if(timerRemaining<=0){
+    const m=parseInt(document.getElementById('timerMinutes').value)||0;
+    const s=parseInt(document.getElementById('timerSeconds').value)||0;
+    timerRemaining=Math.max(0,m*60+s);
+  }
+  if(timerRemaining<=0) return;
+  updateTimerUI();
+  timerInterval=setInterval(()=>{
+    timerRemaining--;
     updateTimerUI();
+    if(timerRemaining<=0){clearInterval(timerInterval); timerInterval=null; alert('⏱ Zamanlayıcı Bitti!');}
+  },1000);
+});
+document.getElementById('timerPause').addEventListener('click',()=>{if(timerInterval){clearInterval(timerInterval); timerInterval=null;}});
+document.getElementById('timerReset').addEventListener('click',()=>{clearInterval(timerInterval); timerInterval=null; timerRemaining=0; updateTimerUI();});
 
-    /* ---------- Alarm ---------- */
-    const alarmStatus = $('alarmStatus');
-    const ringActions = $('ringActions');
-    let alarmTime = null;
-    let alarmRinging = false;
-    let alarmIntervalChecker = null;
-
-    $('alarmSet').addEventListener('click', ()=>{
-      const val = $('alarmTime').value;
-      if (!val) { alarmStatus.textContent = 'Geçersiz saat'; return; }
-      alarmTime = val.slice(0,5); // "HH:MM"
-      alarmStatus.textContent = `Kuruldu: ${alarmTime}`;
-    });
-
-    $('alarmClear').addEventListener('click', ()=>{
-      alarmTime = null;
-      alarmStatus.textContent = 'Kapatıldı';
-      if (alarmRinging) stopAlarmRing();
-    });
-
-    function stopAlarmRing(){
-      alarmRinging = false;
-      ringActions.hidden = true;
-      alarmStatus.textContent = 'Kurulmadı';
-      // stop ongoing audio handled by audio function (it auto-stops)
-    }
-    $('stopRing').addEventListener('click', ()=> {
-      stopAlarmRing();
-    });
-
-    // check alarm every second
-    alarmIntervalChecker = setInterval(()=>{
-      if (!alarmTime || alarmRinging) return;
-      const now = new Date();
-      const cur = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-      if (cur === alarmTime){
-        // ring
-        alarmRinging = true;
-        ringActions.hidden = false;
-        alarmStatus.textContent = 'Çalıyor!';
-        alarmBeep(3000, 880); // 3s beep (may be blocked on some browsers without user gesture)
-        alert('⏰ Alarm çalıyor!');
-        // we don't auto-clear alarmTime so user can stop it manually or we clear it:
-        alarmTime = null;
-      }
-    }, 1000);
-
-    /* ---------- Sound (WebAudio beep) ---------- */
-    function alarmBeep(duration = 1000, frequency = 880){
-      try{
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const ctx = new AudioCtx();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = 'sine';
-        o.frequency.value = frequency;
-        g.gain.value = 0.12;
-        o.connect(g); g.connect(ctx.destination);
-        o.start();
-        // ramp down gently at end
-        setTimeout(() => {
-          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
-          setTimeout(()=>{ try{ o.stop(); ctx.close(); }catch(e){} }, 700);
-        }, duration);
-      }catch(e){
-        // audio may be blocked; fallback to alert already used
-        console.warn('Audio çıkmadı:', e);
-      }
-    }
-
-    /* ---------- Small extras ---------- */
-    // dark toggle (just visual, not a full theme)
-    $('darkToggle').addEventListener('click', ()=>{
-      document.body.classList.toggle('light');
-      if (document.body.classList.contains('light')){
-        document.body.style.background = 'linear-gradient(135deg,#f3f7fb,#e6eef6)';
-        document.body.style.color = '#072018';
-      } else {
-        document.body.style.background = 'linear-gradient(135deg,#071021,#0f1720)';
-        document.body.style.color = '';
-      }
-    });
-
-    // accessibility: focus first input
-    window.addEventListener('load', ()=> $('alarmTime').focus());
-  </script>
+// Alarm
+let alarmTime=null;
+const alarmStatus=document.getElementById('alarmStatus');
+document.getElementById('alarmSet').addEventListener('click',()=>{
+  const val=document.getElementById('alarmTime').value;
+  if(!val){alarmStatus.textContent='Geçersiz saat'; return;}
+  alarmTime=val.slice(0,5);
+  alarmStatus.textContent=`Kuruldu: ${alarmTime}`;
+});
+document.getElementById('alarmClear').addEventListener('click',()=>{
+  alarmTime=null;
+  alarmStatus.textContent='Kurulmadı';
+});
+setInterval(()=>{
+  if(!alarmTime) return;
+  const now=new Date();
+  const cur=`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  if(cur===alarmTime){ alert('⏰ Alarm Çalıyor!'); alarmTime=null; alarmStatus.textContent='Kurulmadı';}
+},1000);
+</script>
 </body>
 </html>

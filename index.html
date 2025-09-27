@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,7 +50,6 @@
     let stopwatchInterval;
     let stopwatchTime = 0;
     function updateStopwatch() {
-      const secs = Math.floor(stopwatchTime / 1000);
       document.getElementById("stopwatchDisplay").textContent =
         new Date(stopwatchTime).toISOString().substr(11, 8);
     }
@@ -77,6 +77,7 @@
       const mins = parseInt(document.getElementById("timerMinutes").value) || 0;
       timerRemaining = mins * 60;
       updateTimerDisplay();
+      clearInterval(timerInterval);
       timerInterval = setInterval(() => {
         timerRemaining--;
         updateTimerDisplay();

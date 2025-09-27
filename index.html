@@ -1,0 +1,108 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Material 3 Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Import map for Material Web -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web/"
+      }
+    }
+  </script>
+
+  <!-- Material Web components -->
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
+    document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px;
+    }
+
+    md-card {
+      max-width: 500px;
+      width: 100%;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    form > div {
+      display: flex;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top App Bar -->
+  <header>
+    <md-top-app-bar>
+      <div slot="headline">Material 3 Demo</div>
+    </md-top-app-bar>
+  </header>
+
+  <!-- Content -->
+  <main>
+    <md-card>
+      <h2 class="md-typescale-title-large">Welcome!</h2>
+      <p class="md-typescale-body-medium">
+        This is a simple page built with <b>Material Web Components (M3)</b>.
+        Explore the form below:
+      </p>
+
+      <form>
+        <md-checkbox>Accept Terms</md-checkbox>
+
+        <div>
+          <span class="md-typescale-body-medium">Pick one:</span>
+          <md-radio name="choice"></md-radio>
+          <md-radio name="choice"></md-radio>
+          <md-radio name="choice"></md-radio>
+        </div>
+
+        <md-outlined-text-field label="Your favorite color"></md-outlined-text-field>
+
+        <div>
+          <md-outlined-button type="reset">Reset</md-outlined-button>
+          <md-filled-button type="submit">Submit</md-filled-button>
+        </div>
+      </form>
+    </md-card>
+  </main>
+</body>
+</html>
+```

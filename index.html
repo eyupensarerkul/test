@@ -1,12 +1,11 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Material 3 Demo</title>
+  <title>Material 3 Full Clock</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Import map for Material Web -->
+  <!-- Material Web Import -->
   <script type="importmap">
     {
       "imports": {
@@ -14,12 +13,90 @@
       }
     }
   </script>
-
-  <!-- Material Web components -->
   <script type="module">
     import '@material/web/all.js';
     import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
     document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+
+    // ---- Clock ----
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("time").textContent = now.toLocaleTimeString();
+      document.getElementById("date").textContent = now.toLocaleDateString();
+    }
+    setInterval(updateClock, 1000);
+    window.onload = updateClock;
+
+    // ---- Alarm ----
+    let alarmTime = null;
+    function setAlarm() {
+      alarmTime = document.getElementById("alarmTime").value;
+      alert("Alarm set for " + alarmTime);
+    }
+    setInterval(() => {
+      if (alarmTime) {
+        const now = new Date();
+        const current = now.getHours().toString().padStart(2, "0") + ":" +
+                        now.getMinutes().toString().padStart(2, "0");
+        if (current === alarmTime) {
+          alert("⏰ Alarm Ringing!");
+          alarmTime = null;
+        }
+      }
+    }, 1000);
+
+    // ---- Stopwatch ----
+    let stopwatchInterval;
+    let stopwatchTime = 0;
+    function updateStopwatch() {
+      const secs = Math.floor(stopwatchTime / 1000);
+      document.getElementById("stopwatchDisplay").textContent =
+        new Date(stopwatchTime).toISOString().substr(11, 8);
+    }
+    function startStopwatch() {
+      if (!stopwatchInterval) {
+        stopwatchInterval = setInterval(() => {
+          stopwatchTime += 1000;
+          updateStopwatch();
+        }, 1000);
+      }
+    }
+    function stopStopwatch() {
+      clearInterval(stopwatchInterval);
+      stopwatchInterval = null;
+    }
+    function resetStopwatch() {
+      stopwatchTime = 0;
+      updateStopwatch();
+    }
+
+    // ---- Timer ----
+    let timerInterval;
+    let timerRemaining = 0;
+    function startTimer() {
+      const mins = parseInt(document.getElementById("timerMinutes").value) || 0;
+      timerRemaining = mins * 60;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timerRemaining--;
+        updateTimerDisplay();
+        if (timerRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert("⏱️ Timer Finished!");
+        }
+      }, 1000);
+    }
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerRemaining / 60);
+      const secs = timerRemaining % 60;
+      document.getElementById("timerDisplay").textContent =
+        String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+    }
+
+    // ---- Dark Mode ----
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
   </script>
 
   <style>
@@ -30,77 +107,90 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      transition: background 0.3s, color 0.3s;
     }
-
+    body.dark {
+      background: #121212;
+      color: #fff;
+    }
     header {
       position: sticky;
       top: 0;
       z-index: 10;
     }
-
     main {
       flex: 1;
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
       padding: 24px;
+      overflow-y: auto;
     }
-
+    #time {
+      font-size: 64px;
+      font-weight: 700;
+    }
+    #date {
+      font-size: 24px;
+      color: #666;
+    }
+    body.dark #date {
+      color: #aaa;
+    }
     md-card {
-      max-width: 500px;
       width: 100%;
+      max-width: 500px;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    form > div {
-      display: flex;
-      gap: 12px;
+    .sectionTitle {
+      font-weight: 600;
+      margin-bottom: 8px;
     }
   </style>
 </head>
 <body>
-  <!-- Top App Bar -->
+  <!-- App Bar -->
   <header>
     <md-top-app-bar>
-      <div slot="headline">Material 3 Demo</div>
+      <div slot="headline">Material Clock</div>
+      <md-icon-button slot="end" onclick="toggleDarkMode()">dark_mode</md-icon-button>
     </md-top-app-bar>
   </header>
 
   <!-- Content -->
   <main>
+    <!-- Clock -->
+    <div id="time">--:--:--</div>
+    <div id="date">Loading...</div>
+
+    <!-- Alarm -->
     <md-card>
-      <h2 class="md-typescale-title-large">Welcome!</h2>
-      <p class="md-typescale-body-medium">
-        This is a simple page built with <b>Material Web Components (M3)</b>.
-        Explore the form below:
-      </p>
+      <div class="sectionTitle">⏰ Alarm</div>
+      <md-outlined-text-field type="time" id="alarmTime" label="Set Alarm"></md-outlined-text-field>
+      <md-filled-button onclick="setAlarm()">Set Alarm</md-filled-button>
+    </md-card>
 
-      <form>
-        <md-checkbox>Accept Terms</md-checkbox>
+    <!-- Stopwatch -->
+    <md-card>
+      <div class="sectionTitle">⏱️ Stopwatch</div>
+      <div id="stopwatchDisplay">00:00:00</div>
+      <div>
+        <md-filled-button onclick="startStopwatch()">Start</md-filled-button>
+        <md-outlined-button onclick="stopStopwatch()">Stop</md-outlined-button>
+        <md-outlined-button onclick="resetStopwatch()">Reset</md-outlined-button>
+      </div>
+    </md-card>
 
-        <div>
-          <span class="md-typescale-body-medium">Pick one:</span>
-          <md-radio name="choice"></md-radio>
-          <md-radio name="choice"></md-radio>
-          <md-radio name="choice"></md-radio>
-        </div>
-
-        <md-outlined-text-field label="Your favorite color"></md-outlined-text-field>
-
-        <div>
-          <md-outlined-button type="reset">Reset</md-outlined-button>
-          <md-filled-button type="submit">Submit</md-filled-button>
-        </div>
-      </form>
+    <!-- Timer -->
+    <md-card>
+      <div class="sectionTitle">⏲️ Timer</div>
+      <div id="timerDisplay">00:00</div>
+      <md-outlined-text-field id="timerMinutes" type="number" label="Minutes"></md-outlined-text-field>
+      <md-filled-button onclick="startTimer()">Start Timer</md-filled-button>
     </md-card>
   </main>
 </body>

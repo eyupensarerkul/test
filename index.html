@@ -1,199 +1,203 @@
-```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Material 3 Full Clock</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>Material Saat Uygulaması</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Material Web Import -->
-  <script type="importmap">
-    {
-      "imports": {
-        "@material/web/": "https://esm.run/@material/web/"
-      }
-    }
-  </script>
-  <script type="module">
-    import '@material/web/all.js';
-    import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
-    document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+  <!-- Materialize CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
 
-    // ---- Clock ----
-    function updateClock() {
-      const now = new Date();
-      document.getElementById("time").textContent = now.toLocaleTimeString();
-      document.getElementById("date").textContent = now.toLocaleDateString();
-    }
-    setInterval(updateClock, 1000);
-    window.onload = updateClock;
-
-    // ---- Alarm ----
-    let alarmTime = null;
-    function setAlarm() {
-      alarmTime = document.getElementById("alarmTime").value;
-      alert("Alarm set for " + alarmTime);
-    }
-    setInterval(() => {
-      if (alarmTime) {
-        const now = new Date();
-        const current = now.getHours().toString().padStart(2, "0") + ":" +
-                        now.getMinutes().toString().padStart(2, "0");
-        if (current === alarmTime) {
-          alert("⏰ Alarm Ringing!");
-          alarmTime = null;
-        }
-      }
-    }, 1000);
-
-    // ---- Stopwatch ----
-    let stopwatchInterval;
-    let stopwatchTime = 0;
-    function updateStopwatch() {
-      document.getElementById("stopwatchDisplay").textContent =
-        new Date(stopwatchTime).toISOString().substr(11, 8);
-    }
-    function startStopwatch() {
-      if (!stopwatchInterval) {
-        stopwatchInterval = setInterval(() => {
-          stopwatchTime += 1000;
-          updateStopwatch();
-        }, 1000);
-      }
-    }
-    function stopStopwatch() {
-      clearInterval(stopwatchInterval);
-      stopwatchInterval = null;
-    }
-    function resetStopwatch() {
-      stopwatchTime = 0;
-      updateStopwatch();
-    }
-
-    // ---- Timer ----
-    let timerInterval;
-    let timerRemaining = 0;
-    function startTimer() {
-      const mins = parseInt(document.getElementById("timerMinutes").value) || 0;
-      timerRemaining = mins * 60;
-      updateTimerDisplay();
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        timerRemaining--;
-        updateTimerDisplay();
-        if (timerRemaining <= 0) {
-          clearInterval(timerInterval);
-          alert("⏱️ Timer Finished!");
-        }
-      }, 1000);
-    }
-    function updateTimerDisplay() {
-      const mins = Math.floor(timerRemaining / 60);
-      const secs = timerRemaining % 60;
-      document.getElementById("timerDisplay").textContent =
-        String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
-    }
-
-    // ---- Dark Mode ----
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark");
-    }
-  </script>
+  <!-- Google Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <style>
     body {
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background: #f5f5f5;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      transition: background 0.3s, color 0.3s;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      color: white;
     }
-    body.dark {
-      background: #121212;
-      color: #fff;
+    .container {
+      margin-top: 40px;
     }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    .time-display {
+      font-size: 3rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 20px 0;
     }
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      padding: 24px;
-      overflow-y: auto;
+    .anim {
+      transition: all 0.3s ease-in-out;
     }
-    #time {
-      font-size: 64px;
-      font-weight: 700;
-    }
-    #date {
-      font-size: 24px;
-      color: #666;
-    }
-    body.dark #date {
-      color: #aaa;
-    }
-    md-card {
-      width: 100%;
-      max-width: 500px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .sectionTitle {
-      font-weight: 600;
-      margin-bottom: 8px;
+    .anim:hover {
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
-  <!-- App Bar -->
-  <header>
-    <md-top-app-bar>
-      <div slot="headline">Material Clock</div>
-      <md-icon-button slot="end" onclick="toggleDarkMode()">dark_mode</md-icon-button>
-    </md-top-app-bar>
-  </header>
 
-  <!-- Content -->
-  <main>
-    <!-- Clock -->
-    <div id="time">--:--:--</div>
-    <div id="date">Loading...</div>
+  <div class="container">
+    <h4 class="center">⏰ Material Saat Uygulaması</h4>
+
+    <!-- Sekmeler -->
+    <ul class="tabs tabs-fixed-width">
+      <li class="tab col s3"><a href="#saat" class="active">Saat</a></li>
+      <li class="tab col s3"><a href="#kronometre">Kronometre</a></li>
+      <li class="tab col s3"><a href="#zamanlayici">Zamanlayıcı</a></li>
+      <li class="tab col s3"><a href="#alarm">Alarm</a></li>
+    </ul>
+
+    <!-- Saat -->
+    <div id="saat" class="col s12">
+      <div class="time-display card-panel green darken-2 anim" id="clock">--:--:--</div>
+    </div>
+
+    <!-- Kronometre -->
+    <div id="kronometre" class="col s12">
+      <div class="time-display card-panel teal darken-2 anim" id="stopwatch">00:00:00</div>
+      <div class="center">
+        <button class="btn waves-effect waves-light" onclick="startStopwatch()">Başlat</button>
+        <button class="btn red darken-1 waves-effect" onclick="stopStopwatch()">Durdur</button>
+        <button class="btn grey darken-3 waves-effect" onclick="resetStopwatch()">Sıfırla</button>
+      </div>
+    </div>
+
+    <!-- Zamanlayıcı -->
+    <div id="zamanlayici" class="col s12">
+      <div class="input-field">
+        <input type="number" id="timerInput" min="1" placeholder="Süre (saniye)">
+        <label for="timerInput">Süreyi Gir (sn)</label>
+      </div>
+      <div class="time-display card-panel blue darken-2 anim" id="timerDisplay">00:00</div>
+      <div class="center">
+        <button class="btn waves-effect waves-light" onclick="startTimer()">Başlat</button>
+        <button class="btn red darken-1 waves-effect" onclick="stopTimer()">Durdur</button>
+        <button class="btn grey darken-3 waves-effect" onclick="resetTimer()">Sıfırla</button>
+      </div>
+    </div>
 
     <!-- Alarm -->
-    <md-card>
-      <div class="sectionTitle">⏰ Alarm</div>
-      <md-outlined-text-field type="time" id="alarmTime" label="Set Alarm"></md-outlined-text-field>
-      <md-filled-button onclick="setAlarm()">Set Alarm</md-filled-button>
-    </md-card>
-
-    <!-- Stopwatch -->
-    <md-card>
-      <div class="sectionTitle">⏱️ Stopwatch</div>
-      <div id="stopwatchDisplay">00:00:00</div>
-      <div>
-        <md-filled-button onclick="startStopwatch()">Start</md-filled-button>
-        <md-outlined-button onclick="stopStopwatch()">Stop</md-outlined-button>
-        <md-outlined-button onclick="resetStopwatch()">Reset</md-outlined-button>
+    <div id="alarm" class="col s12">
+      <div class="input-field">
+        <input type="time" id="alarmTime">
+        <label for="alarmTime">Alarm Saati</label>
       </div>
-    </md-card>
+      <div class="center">
+        <button class="btn waves-effect waves-light" onclick="setAlarm()">Kur</button>
+      </div>
+      <p id="alarmStatus" class="center"></p>
+    </div>
+  </div>
 
-    <!-- Timer -->
-    <md-card>
-      <div class="sectionTitle">⏲️ Timer</div>
-      <div id="timerDisplay">00:00</div>
-      <md-outlined-text-field id="timerMinutes" type="number" label="Minutes"></md-outlined-text-field>
-      <md-filled-button onclick="startTimer()">Start Timer</md-filled-button>
-    </md-card>
-  </main>
+  <!-- Materialize JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <script>
+    // Sekmeleri aktif et
+    document.addEventListener('DOMContentLoaded', function() {
+      var elems = document.querySelectorAll('.tabs');
+      M.Tabs.init(elems);
+    });
+
+    // ----- Saat -----
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = 
+        now.toLocaleTimeString('tr-TR', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ----- Kronometre -----
+    let stopwatchInterval;
+    let stopwatchSeconds = 0;
+
+    function formatTime(sec) {
+      let h = Math.floor(sec / 3600);
+      let m = Math.floor((sec % 3600) / 60);
+      let s = sec % 60;
+      return [h,m,s].map(v=>v.toString().padStart(2,'0')).join(':');
+    }
+
+    function startStopwatch() {
+      if (!stopwatchInterval) {
+        stopwatchInterval = setInterval(() => {
+          stopwatchSeconds++;
+          document.getElementById('stopwatch').textContent = formatTime(stopwatchSeconds);
+        }, 1000);
+      }
+    }
+
+    function stopStopwatch() {
+      clearInterval(stopwatchInterval);
+      stopwatchInterval = null;
+    }
+
+    function resetStopwatch() {
+      stopStopwatch();
+      stopwatchSeconds = 0;
+      document.getElementById('stopwatch').textContent = "00:00:00";
+    }
+
+    // ----- Zamanlayıcı -----
+    let timerInterval;
+    let timerSeconds = 0;
+
+    function startTimer() {
+      const input = document.getElementById('timerInput').value;
+      if (input && !timerInterval) {
+        timerSeconds = parseInt(input);
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+          timerSeconds--;
+          updateTimerDisplay();
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            alert("Zamanlayıcı Bitti!");
+          }
+        }, 1000);
+      }
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    function resetTimer() {
+      stopTimer();
+      document.getElementById('timerDisplay').textContent = "00:00";
+    }
+
+    function updateTimerDisplay() {
+      let m = Math.floor(timerSeconds / 60);
+      let s = timerSeconds % 60;
+      document.getElementById('timerDisplay').textContent = 
+        m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
+    }
+
+    // ----- Alarm -----
+    let alarmTime = null;
+
+    function setAlarm() {
+      alarmTime = document.getElementById('alarmTime').value;
+      if (alarmTime) {
+        document.getElementById('alarmStatus').textContent = "Alarm Kuruldu: " + alarmTime;
+      }
+    }
+
+    setInterval(() => {
+      if (alarmTime) {
+        const now = new Date();
+        let current = now.getHours().toString().padStart(2,'0') + ":" + 
+                      now.getMinutes().toString().padStart(2,'0');
+        if (current === alarmTime) {
+          alert("⏰ Alarm Çaldı!");
+          alarmTime = null;
+          document.getElementById('alarmStatus').textContent = "";
+        }
+      }
+    }, 1000);
+  </script>
 </body>
 </html>
-```

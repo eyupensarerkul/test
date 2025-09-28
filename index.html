@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material Notlar Uygulaması (LocalStorage)</title>
+    <title>Material Notlar Uygulaması (Modal ve Tik)</title>
     
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -11,36 +11,30 @@
     <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
     
     <style>
-        body {
-            background-color: #f4f4f4;
-            margin: 0;
-            padding-bottom: 80px; 
-        }
-        .mdc-top-app-bar {
-            background-color: #6750A4; /* Primary */
-            color: white;
-            position: sticky; /* Sayfa kaydırıldığında sabit kalması için */
-            top: 0;
-            z-index: 100;
-        }
-        .container {
-            padding: 20px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
+        /* Genel Stil Ayarları */
+        body { background-color: #f4f4f4; margin: 0; padding-bottom: 80px; }
+        .mdc-top-app-bar { background-color: #6750A4; color: white; position: sticky; top: 0; z-index: 100; }
+        .container { padding: 20px; max-width: 900px; margin: 0 auto; }
+        .mdc-fab { position: fixed; bottom: 24px; right: 24px; }
+
+        /* Not Kartı Stilleri */
         .note-card {
             margin-bottom: 16px;
-            cursor: pointer; /* Tıklanabilir olduğunu belirtir */
+            cursor: pointer;
+            transition: box-shadow 0.2s, background-color 0.2s;
         }
-        .mdc-fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
+        .note-card--completed .mdc-card__primary-action {
+            /* Tamamlanmış notlar için hafif gri ton */
+            background-color: #e0e0e0; 
+            text-decoration: line-through;
+            opacity: 0.7;
         }
-        .mdc-snackbar--leading {
-            /* Snackbar'ı ekranın alt sol köşesine sabitler */
-            left: 24px; 
-            right: auto;
+
+        /* Modal Diyalog Stilleri */
+        .mdc-dialog__title { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
         }
     </style>
 </head>
@@ -49,15 +43,15 @@
     <header class="mdc-top-app-bar">
       <div class="mdc-top-app-bar__row">
         <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-          <span class="mdc-top-app-bar__title">LocalStorage Notlar (M3)</span>
+          <span class="mdc-top-app-bar__title">Material Notlar (Modal)</span>
         </section>
       </div>
     </header>
 
     <div class="container">
-        <h1>Kaydedilmiş Notlarınız</h1>
+        <h1>Notlar</h1>
         
-        <div class="mdc-layout-grid" id="notes-grid">
+        <div class="mdc-layout-grid">
             <div class="mdc-layout-grid__inner" id="notes-container">
                 </div>
         </div>
@@ -68,16 +62,53 @@
       <span class="mdc-fab__icon material-icons">add</span>
     </button>
     
+    <div class="mdc-dialog" id="note-dialog">
+      <div class="mdc-dialog__container">
+        <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true">
+          
+          <h2 class="mdc-dialog__title">
+            <span id="dialog-title">Not Başlığı</span>
+            <div class="mdc-form-field">
+                <div class="mdc-checkbox">
+                    <input type="checkbox"
+                           class="mdc-checkbox__native-control"
+                           id="dialog-complete-checkbox"/>
+                    <div class="mdc-checkbox__background">
+                        <svg class="mdc-checkbox__checkmark"
+                             viewBox="0 0 24 24">
+                            <path class="mdc-checkbox__checkmark-path"
+                                  fill="none"
+                                  d="M1.73,12.91 8.27,19.45 22.27,5.45"/>
+                        </svg>
+                        <div class="mdc-checkbox__mixedmark"></div>
+                    </div>
+                </div>
+                <label for="dialog-complete-checkbox">Tamamlandı</label>
+            </div>
+          </h2>
+          
+          <div class="mdc-dialog__content" id="dialog-content">
+            Not içeriği buraya gelecek.
+          </div>
+          
+          <div class="mdc-dialog__actions">
+            <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close">
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Kapat</span>
+            </button>
+            <button type="button" class="mdc-button mdc-dialog__button" id="dialog-delete-button">
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">SİL</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="mdc-dialog__scrim"></div>
+    </div>
+    
     <div class="mdc-snackbar mdc-snackbar--leading" aria-live="assertive" aria-atomic="true" aria-hidden="true" id="my-snackbar">
       <div class="mdc-snackbar__surface" role="status">
-        <div class="mdc-snackbar__label" role="presentation">
-          </div>
-        <div class="mdc-snackbar__actions">
-          <button type="button" class="mdc-button mdc-snackbar__action">
-            <div class="mdc-button__ripple"></div>
-            <span class="mdc-button__label">GERİ AL</span>
-          </button>
-        </div>
+        <div class="mdc-snackbar__label" role="presentation"></div>
       </div>
     </div>
 
@@ -85,47 +116,80 @@
 
     <script>
         const MDCSnackbar = mdc.snackbar.MDCSnackbar;
-        const snackbar = new MDCSnackbar(document.getElementById('my-snackbar'));
+        const MDCComponent = mdc.base.MDCComponent;
+        const MDCDialog = mdc.dialog.MDCDialog;
         const notesContainer = document.getElementById('notes-container');
         const addButton = document.getElementById('add-note-button');
+        const noteDialogElement = document.getElementById('note-dialog');
+        const dialog = new MDCDialog(noteDialogElement);
+        const snackbar = new MDCSnackbar(document.getElementById('my-snackbar'));
 
-        // Sabit anahtar
-        const NOTES_STORAGE_KEY = 'materialNotesApp';
+        // Dialog içerisindeki elemanlar
+        const dialogTitle = document.getElementById('dialog-title');
+        const dialogContent = document.getElementById('dialog-content');
+        const dialogCheckbox = document.getElementById('dialog-complete-checkbox');
+        const dialogDeleteButton = document.getElementById('dialog-delete-button');
 
-        /**
-         * Notları localStorage'dan okur.
-         * @returns {Array} Notlar dizisi.
-         */
+        const NOTES_STORAGE_KEY = 'materialNotesAppModal';
+        let currentNoteId = null; // Şu anda açık olan notun ID'si
+
+        // --- LocalStorage Fonksiyonları ---
+
         function getNotes() {
             const notesJson = localStorage.getItem(NOTES_STORAGE_KEY);
-            // Eğer veri yoksa boş bir dizi döndürür
             return notesJson ? JSON.parse(notesJson) : [];
         }
 
-        /**
-         * Notlar dizisini localStorage'a kaydeder.
-         * @param {Array} notes Kaydedilecek notlar dizisi.
-         */
         function saveNotes(notes) {
             localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
         }
 
-        /**
-         * Bir not objesini HTML kartına dönüştürür.
-         * @param {object} note Not objesi ({id, title, content})
-         * @returns {string} HTML dizesi.
-         */
+        // --- Not İşleme Fonksiyonları ---
+
+        function findNoteById(id) {
+            const notes = getNotes();
+            return notes.find(n => n.id === id);
+        }
+
+        function updateNote(id, updates) {
+            let notes = getNotes();
+            const noteIndex = notes.findIndex(n => n.id === id);
+            
+            if (noteIndex !== -1) {
+                notes[noteIndex] = { ...notes[noteIndex], ...updates };
+                saveNotes(notes);
+                renderNotes();
+                return notes[noteIndex];
+            }
+            return null;
+        }
+        
+        function deleteNote(id) {
+            let notes = getNotes();
+            const initialLength = notes.length;
+            notes = notes.filter(n => n.id !== id);
+            
+            if (notes.length < initialLength) {
+                saveNotes(notes);
+                renderNotes();
+                return true;
+            }
+            return false;
+        }
+
+        // --- Arayüz Fonksiyonları ---
+
         function createNoteCard(note) {
+            const completedClass = note.completed ? 'note-card--completed' : '';
             return `
                 <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
-                    <div class="mdc-card note-card" data-id="${note.id}">
+                    <div class="mdc-card note-card ${completedClass}" data-id="${note.id}">
                         <div class="mdc-card__primary-action mdc-card__ripple">
                             <div class="demo-card__primary">
                                 <h2 class="demo-card__title mdc-typography mdc-typography--headline6">${note.title}</h2>
-                                <h3 class="demo-card__subtitle mdc-typography mdc-typography--subtitle2">${new Date(note.date).toLocaleDateString()}</h3>
                             </div>
                             <div class="demo-card__secondary mdc-typography mdc-typography--body2">
-                                ${note.content.substring(0, 100)}...
+                                ${note.completed ? '<span class="material-icons" style="font-size: 16px; margin-right: 4px; vertical-align: middle;">done</span> Tamamlandı' : note.content.substring(0, 100) + '...'}
                             </div>
                         </div>
                     </div>
@@ -133,89 +197,109 @@
             `;
         }
         
-        /**
-         * Notları ekrana çizer.
-         * @param {Array} notes Notlar dizisi.
-         */
-        function renderNotes(notes) {
+        function renderNotes() {
+            const notes = getNotes();
             notesContainer.innerHTML = notes.map(createNoteCard).join('');
-            // Yeni eklenen bileşenlere MDC ripple efekti uygular
+            
+            // Tıklama olayını yeni eklenen tüm kartlara bağla
+            notesContainer.querySelectorAll('.note-card').forEach(card => {
+                card.addEventListener('click', handleNoteClick);
+            });
+
             mdc.autoInit(notesContainer); 
         }
 
-        /**
-         * Yeni not ekleme işlemini başlatır ve kaydeder.
-         */
-        function addNewNote() {
-            // Basit bir prompt ile kullanıcıdan not başlığı ve içeriği alınır
-            const title = prompt("Lütfen not başlığını girin:", "Yeni Not");
-            if (!title) return; // Başlık yoksa iptal et
-            
-            const content = prompt("Lütfen not içeriğini girin:", "Bu bir deneme notudur.");
-            if (!content) return; // İçerik yoksa iptal et
-
-            const newNote = {
-                id: Date.now(), // Basit bir benzersiz ID
-                title: title,
-                content: content,
-                date: new Date().toISOString()
-            };
-
-            const notes = getNotes();
-            notes.unshift(newNote); // Yeni notu en başa ekle
-            saveNotes(notes);
-            renderNotes(notes);
-            
-            // Snackbar'ı göster
-            showSnackbar("Not başarıyla kaydedildi.", "GERİ AL");
-        }
-
-        /**
-         * Pop-up Bar'ı (Snackbar'ı) gösterir.
-         * @param {string} message Gösterilecek mesaj.
-         * @param {string} actionLabel Eylem düğmesi metni.
-         */
-        function showSnackbar(message, actionLabel = null) {
-            // Snackbar içeriğini dinamik olarak ayarla
-            snackbar.timeoutMs = 5000; // 5 saniye
-            snackbar.data = {
-                message: message,
-                actionText: actionLabel
-            };
+        function showSnackbar(message) {
+            snackbar.timeoutMs = 3000;
+            snackbar.data = { message: message };
             snackbar.open();
         }
 
-        // --- Sayfa Yüklendiğinde ---
+        // --- Olay İşleyicileri ---
+
+        function addNewNote() {
+            const title = prompt("Lütfen not başlığını girin:", "Yapılacak İş");
+            if (!title) return;
+            
+            const content = prompt("Lütfen not içeriğini girin:", "Bugün spor salonuna git.");
+            if (!content) return;
+
+            const newNote = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                date: new Date().toISOString(),
+                completed: false
+            };
+
+            const notes = getNotes();
+            notes.unshift(newNote);
+            saveNotes(notes);
+            renderNotes();
+            
+            showSnackbar("Yeni not başarıyla eklendi.");
+        }
         
-        // 1. Notları localStorage'dan yükle ve ekrana çiz.
+        function handleNoteClick(event) {
+            const card = event.currentTarget;
+            currentNoteId = parseInt(card.getAttribute('data-id'));
+            const note = findNoteById(currentNoteId);
+            
+            if (note) {
+                // Modalı not bilgileriyle doldur
+                dialogTitle.textContent = note.title;
+                dialogContent.textContent = note.content;
+                dialogCheckbox.checked = note.completed;
+
+                // Modalı aç
+                dialog.open();
+            }
+        }
+        
+        // Not tamamlanma durumunu güncelle
+        dialogCheckbox.addEventListener('change', () => {
+            if (currentNoteId) {
+                const isCompleted = dialogCheckbox.checked;
+                updateNote(currentNoteId, { completed: isCompleted });
+                
+                // Snackbar ile bildirim yap
+                showSnackbar(isCompleted ? "Not tamamlandı olarak işaretlendi." : "Not yeniden açıldı.");
+            }
+        });
+        
+        // Notu silme işlemi
+        dialogDeleteButton.addEventListener('click', () => {
+            if (currentNoteId && confirm("Bu notu silmek istediğinizden emin misiniz?")) {
+                deleteNote(currentNoteId);
+                showSnackbar("Not kalıcı olarak silindi.");
+                dialog.close(); // Modalı kapat
+            }
+        });
+        
+        // --- Uygulama Başlatma ---
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Başlangıç notu ekle (ilk defa çalıştırıldığında)
             const initialNotes = getNotes();
-            // Örnek başlangıç notu ekleme (sadece ilk defa çalıştırıldığında)
             if (initialNotes.length === 0) {
                  const sampleNote = {
                     id: 1,
-                    title: "Hoş Geldiniz Notu",
-                    content: "Bu not, tarayıcınızın LocalStorage alanında kaydedilmiştir. FAB (artı düğmesi) ile yeni not ekleyebilirsiniz!",
-                    date: new Date().toISOString()
+                    title: "Alışveriş Listesi",
+                    content: "Ekmek, süt ve yumurta almayı unutma. Listeni tamamladığında tik koy!",
+                    date: new Date().toISOString(),
+                    completed: false
                 };
                 initialNotes.push(sampleNote);
                 saveNotes(initialNotes);
             }
-            renderNotes(initialNotes);
+            renderNotes();
 
-            // 2. FAB düğmesine tıklama olayını ekle
+            // FAB düğmesine tıklama olayını ekle
             addButton.addEventListener('click', addNewNote);
             
-            // 3. Geri Al butonu olay dinleyicisini ayarla
-            snackbar.listen('MDCSnackbar:action', () => {
-                // Burada en son silinen notu geri getirme mantığı uygulanır
-                showSnackbar("Geri alma işlemi başarıyla tamamlandı.");
-            });
-            
-            // 4. Sayfadaki tüm bileşenler için MDC başlatma
+            // Sayfadaki tüm bileşenler için MDC başlatma
             mdc.autoInit();
         });
-        
     </script>
 </body>
 </html>

@@ -3,38 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material Notlar Uygulaması (Modal ve Tik)</title>
+    <title>Material Notlar (Symbols ve Optimizasyon)</title>
     
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
     <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
     
     <style>
-        /* Genel Stil Ayarları */
+        /* Genel Stil Ayarları (Öncekilerle Aynı) */
         body { background-color: #f4f4f4; margin: 0; padding-bottom: 80px; }
         .mdc-top-app-bar { background-color: #6750A4; color: white; position: sticky; top: 0; z-index: 100; }
         .container { padding: 20px; max-width: 900px; margin: 0 auto; }
         .mdc-fab { position: fixed; bottom: 24px; right: 24px; }
+        .note-card--completed .mdc-card__primary-action { background-color: #e0e0e0; text-decoration: line-through; opacity: 0.7; }
+        .mdc-dialog__title { display: flex; justify-content: space-between; align-items: center;}
 
-        /* Not Kartı Stilleri */
-        .note-card {
-            margin-bottom: 16px;
-            cursor: pointer;
-            transition: box-shadow 0.2s, background-color 0.2s;
-        }
-        .note-card--completed .mdc-card__primary-action {
-            /* Tamamlanmış notlar için hafif gri ton */
-            background-color: #e0e0e0; 
-            text-decoration: line-through;
-            opacity: 0.7;
+        /* Material Symbols için Değişken Eksen Yapılandırması (CSS ile) */
+        .material-symbols-outlined { 
+            /* Varsayılan stil: Doldurulmamış (0), Normal Kalınlık (400), Normal Optik Boyut (24) */
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            /* Simge boyutlarını kontrol eden ek ayar */
+            font-size: 24px;
         }
 
-        /* Modal Diyalog Stilleri */
-        .mdc-dialog__title { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
+        /* Tamamlanmış not kartı içinde doldurulmuş tik simgesi (FILL: 1) */
+        .note-card--completed .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+            color: #4CAF50; /* Yeşil renk tonu */
         }
     </style>
 </head>
@@ -43,7 +40,7 @@
     <header class="mdc-top-app-bar">
       <div class="mdc-top-app-bar__row">
         <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-          <span class="mdc-top-app-bar__title">Material Notlar (Modal)</span>
+          <span class="mdc-top-app-bar__title">Material Notlar (Symbols)</span>
         </section>
       </div>
     </header>
@@ -59,7 +56,7 @@
 
     <button class="mdc-fab" aria-label="Yeni Not Ekle" id="add-note-button">
       <div class="mdc-fab__ripple"></div>
-      <span class="mdc-fab__icon material-icons">add</span>
+      <span class="mdc-fab__icon material-symbols-outlined">add</span>
     </button>
     
     <div class="mdc-dialog" id="note-dialog">
@@ -99,6 +96,7 @@
             <button type="button" class="mdc-button mdc-dialog__button" id="dialog-delete-button">
               <div class="mdc-button__ripple"></div>
               <span class="mdc-button__label">SİL</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; margin-left: 8px;">delete</span>
             </button>
           </div>
         </div>
@@ -115,25 +113,23 @@
     <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 
     <script>
+        // JavaScript kısmı, simgelerin DOM'a eklenmesinden bağımsız olduğu için büyük ölçüde aynı kalmıştır.
+        // Yalnızca renderNotes fonksiyonunda tamamlanmış notun simge içeriği güncellendi.
+        
         const MDCSnackbar = mdc.snackbar.MDCSnackbar;
-        const MDCComponent = mdc.base.MDCComponent;
         const MDCDialog = mdc.dialog.MDCDialog;
         const notesContainer = document.getElementById('notes-container');
         const addButton = document.getElementById('add-note-button');
-        const noteDialogElement = document.getElementById('note-dialog');
-        const dialog = new MDCDialog(noteDialogElement);
+        const dialog = new MDCDialog(document.getElementById('note-dialog'));
         const snackbar = new MDCSnackbar(document.getElementById('my-snackbar'));
 
-        // Dialog içerisindeki elemanlar
         const dialogTitle = document.getElementById('dialog-title');
         const dialogContent = document.getElementById('dialog-content');
         const dialogCheckbox = document.getElementById('dialog-complete-checkbox');
         const dialogDeleteButton = document.getElementById('dialog-delete-button');
 
         const NOTES_STORAGE_KEY = 'materialNotesAppModal';
-        let currentNoteId = null; // Şu anda açık olan notun ID'si
-
-        // --- LocalStorage Fonksiyonları ---
+        let currentNoteId = null;
 
         function getNotes() {
             const notesJson = localStorage.getItem(NOTES_STORAGE_KEY);
@@ -143,8 +139,6 @@
         function saveNotes(notes) {
             localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
         }
-
-        // --- Not İşleme Fonksiyonları ---
 
         function findNoteById(id) {
             const notes = getNotes();
@@ -177,8 +171,6 @@
             return false;
         }
 
-        // --- Arayüz Fonksiyonları ---
-
         function createNoteCard(note) {
             const completedClass = note.completed ? 'note-card--completed' : '';
             return `
@@ -189,7 +181,7 @@
                                 <h2 class="demo-card__title mdc-typography mdc-typography--headline6">${note.title}</h2>
                             </div>
                             <div class="demo-card__secondary mdc-typography mdc-typography--body2">
-                                ${note.completed ? '<span class="material-icons" style="font-size: 16px; margin-right: 4px; vertical-align: middle;">done</span> Tamamlandı' : note.content.substring(0, 100) + '...'}
+                                ${note.completed ? '<span class="material-symbols-outlined" style="font-size: 20px; margin-right: 4px; vertical-align: middle;">check_circle</span> Tamamlandı' : note.content.substring(0, 100) + '...'}
                             </div>
                         </div>
                     </div>
@@ -201,7 +193,6 @@
             const notes = getNotes();
             notesContainer.innerHTML = notes.map(createNoteCard).join('');
             
-            // Tıklama olayını yeni eklenen tüm kartlara bağla
             notesContainer.querySelectorAll('.note-card').forEach(card => {
                 card.addEventListener('click', handleNoteClick);
             });
@@ -214,8 +205,6 @@
             snackbar.data = { message: message };
             snackbar.open();
         }
-
-        // --- Olay İşleyicileri ---
 
         function addNewNote() {
             const title = prompt("Lütfen not başlığını girin:", "Yapılacak İş");
@@ -246,40 +235,30 @@
             const note = findNoteById(currentNoteId);
             
             if (note) {
-                // Modalı not bilgileriyle doldur
                 dialogTitle.textContent = note.title;
                 dialogContent.textContent = note.content;
                 dialogCheckbox.checked = note.completed;
-
-                // Modalı aç
                 dialog.open();
             }
         }
         
-        // Not tamamlanma durumunu güncelle
         dialogCheckbox.addEventListener('change', () => {
             if (currentNoteId) {
                 const isCompleted = dialogCheckbox.checked;
                 updateNote(currentNoteId, { completed: isCompleted });
-                
-                // Snackbar ile bildirim yap
                 showSnackbar(isCompleted ? "Not tamamlandı olarak işaretlendi." : "Not yeniden açıldı.");
             }
         });
         
-        // Notu silme işlemi
         dialogDeleteButton.addEventListener('click', () => {
             if (currentNoteId && confirm("Bu notu silmek istediğinizden emin misiniz?")) {
                 deleteNote(currentNoteId);
                 showSnackbar("Not kalıcı olarak silindi.");
-                dialog.close(); // Modalı kapat
+                dialog.close();
             }
         });
         
-        // --- Uygulama Başlatma ---
-
         document.addEventListener('DOMContentLoaded', () => {
-            // Başlangıç notu ekle (ilk defa çalıştırıldığında)
             const initialNotes = getNotes();
             if (initialNotes.length === 0) {
                  const sampleNote = {
@@ -293,11 +272,7 @@
                 saveNotes(initialNotes);
             }
             renderNotes();
-
-            // FAB düğmesine tıklama olayını ekle
             addButton.addEventListener('click', addNewNote);
-            
-            // Sayfadaki tüm bileşenler için MDC başlatma
             mdc.autoInit();
         });
     </script>

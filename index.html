@@ -1,212 +1,759 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Material 3 Saat Uygulaması</title>
-  <!-- Material Symbols -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:
-opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Material 3 Saat / Kronometre / Zamanlayıcı + Mini Bar</title>
+
+  <!-- Material Symbols (variable) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" />
 
   <style>
-    body {
-      font-family: "Roboto", sans-serif;
-      background: #f8f9fa;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+    :root{
+      --bg: #edf2f7;
+      --card: #ffffff;
+      --primary: #00695c; /* deep teal */
+      --primary-strong: #004d40;
+      --accent: #00bfa5;
+      --muted: #6b7280;
+      --glass: rgba(255,255,255,0.6);
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --shadow: 0 10px 30px rgba(2,6,23,0.12);
     }
 
-    .app {
-      background: #fff;
-      border-radius: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      width: 400px;
-      padding: 20px;
-      text-align: center;
-      transition: all 0.3s ease;
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Roboto,Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#eef6f5 0%,var(--bg) 100%);color:#0f172a}
+
+    /* App container */
+    .container{
+      width:100%;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
     }
 
-    h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: #333;
+    .card{
+      width:920px;
+      max-width:95%;
+      background:linear-gradient(180deg,rgba(255,255,255,0.9),var(--card));
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:0;
+      position:relative;
     }
 
-    .time-display {
-      font-size: 40px;
-      font-weight: bold;
-      margin: 20px 0;
-      color: #222;
-      transition: transform 0.3s ease;
+    /* Left: main panel */
+    .main{
+      padding:28px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
     }
 
-    .time-display.animate {
-      transform: scale(1.1);
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
     }
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
+    .title{
+      display:flex;
+      gap:12px;
+      align-items:center;
     }
 
-    .material-symbols-outlined {
-      font-size: 36px;
-      cursor: pointer;
-      user-select: none;
-      border-radius: 50%;
-      padding: 10px;
-      transition: all 0.3s ease;
+    .title h2{margin:0;font-size:20px;letter-spacing:0.2px}
+    .title p{margin:0;color:var(--muted);font-size:13px}
+
+    .mini-toggle{
+      display:flex;
+      gap:8px;
+      align-items:center;
     }
 
-    .material-symbols-outlined:hover {
-      background: rgba(0,0,0,0.05);
-      transform: scale(1.2);
+    .btn{
+      background:var(--glass);
+      border:none;
+      padding:8px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition:all .18s ease;
+      color:var(--primary-strong);
+      font-weight:500;
+    }
+    .btn:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+
+    /* Mode tabs */
+    .tabs{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .tab{
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      color:var(--muted);
+      font-weight:600;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .tab.active{background:linear-gradient(90deg,var(--primary),var(--accent)); color:white; box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+
+    /* Big display area */
+    .display{
+      background:linear-gradient(180deg,rgba(0,0,0,0.03),transparent);
+      border-radius:14px;
+      padding:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:10px;
+      min-height:220px;
+      text-align:center;
+      position:relative;
     }
 
-    .tabs {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 15px;
+    .big-time{
+      font-size:64px;
+      font-weight:700;
+      letter-spacing:1px;
+    }
+    .sub{
+      color:var(--muted);
+      font-weight:500;
+      font-size:14px;
     }
 
-    .tab {
-      flex: 1;
-      padding: 10px;
-      cursor: pointer;
-      border-radius: 12px;
-      transition: background 0.3s;
-      font-weight: 500;
+    /* Controls big */
+    .controls{
+      display:flex;
+      gap:14px;
+      justify-content:center;
+      margin-top:4px;
+    }
+    .icon{
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 40;
+      font-size:34px;
+      padding:12px;
+      border-radius:12px;
+      cursor:pointer;
+      transition:all .18s;
+      background:transparent;
+      color:var(--primary-strong);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .icon:hover{transform:translateY(-4px); background:rgba(0,0,0,0.03)}
+
+    /* Right column: settings / lists */
+    .side{
+      background:linear-gradient(180deg,rgba(2,6,23,0.02),transparent);
+      padding:22px;
+      border-left:1px solid rgba(0,0,0,0.04);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      min-width:260px;
     }
 
-    .tab.active {
-      background: #4CAF50;
-      color: white;
+    .panel{
+      background:rgba(255,255,255,0.6);
+      padding:12px;
+      border-radius:12px;
+      box-shadow:inset 0 -1px 0 rgba(0,0,0,0.02);
+    }
+    .label{font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600}
+
+    /* Timer inputs */
+    .row{display:flex;gap:8px;align-items:center}
+    .input{
+      padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);min-width:0;background:white;flex:1;font-weight:600
+    }
+    .small{font-size:13px;color:var(--muted)}
+
+    /* Alarms list */
+    .alarms{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto;padding-right:6px}
+    .alarm-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;background:linear-gradient(90deg,#fff,#fbfffd);box-shadow:0 6px 14px rgba(0,0,0,0.04)}
+    .alarm-item .meta{display:flex;flex-direction:column}
+    .alarm-time{font-weight:700}
+    .alarm-note{font-size:12px;color:var(--muted)}
+
+    /* Mini bar (bottom) */
+    .mini-bar{
+      position:fixed;
+      left:20px;
+      right:20px;
+      bottom:-120px; /* hidden by default */
+      height:72px;
+      border-radius:14px;
+      background:linear-gradient(90deg, rgba(255,255,255,0.9), rgba(250,255,250,0.9));
+      box-shadow:0 24px 40px rgba(5,10,10,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 16px;
+      gap:12px;
+      transition:bottom .36s cubic-bezier(.2,.9,.18,1), transform .25s ease;
+      z-index:9999;
+      backdrop-filter: blur(6px);
+    }
+    .mini-bar.show{bottom:20px}
+    .mini-left{display:flex;align-items:center;gap:12px}
+    .mini-thumb{width:56px;height:48px;border-radius:10px;background:linear-gradient(180deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    .mini-info{display:flex;flex-direction:column;gap:4px}
+    .mini-title{font-weight:700}
+    .mini-time{font-weight:700;color:var(--primary-strong)}
+    .mini-controls{display:flex;gap:8px;align-items:center}
+    .mini-ico{width:44px;height:44px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;border:none;font-size:22px;color:var(--primary-strong)}
+    .mini-ico:hover{background:rgba(0,0,0,0.04);transform:translateY(-3px)}
+
+    /* Expand button top-left of mini */
+    .mini-expand{position:fixed;right:26px;bottom:102px;background:var(--primary);color:white;border-radius:999px;padding:8px 12px;border:none;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,0.12)}
+
+    /* Responsive */
+    @media (max-width:900px){
+      .card{grid-template-columns:1fr}
+      .side{display:none}
+      .mini-bar{left:12px;right:12px}
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <h1 id="modeTitle">Saat</h1>
-    <div class="time-display" id="timeDisplay">00:00:00</div>
+  <div class="container">
+    <div class="card" id="appCard">
+      <div class="main">
+        <div class="header">
+          <div class="title">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="border-radius:8px;background:linear-gradient(180deg,var(--primary),var(--accent));padding:6px;color:white">
+              <path d="M12 6v6l4 2" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="9" stroke="white" stroke-width="1.6" fill="transparent"/>
+            </svg>
+            <div>
+              <h2>Eywallah Saat</h2>
+              <p style="margin:0" class="small">Tam ekran + mini kontrol bar deneyimi</p>
+            </div>
+          </div>
 
-    <div class="controls">
-      <span class="material-symbols-outlined" id="startPause">play_arrow</span>
-      <span class="material-symbols-outlined" id="reset">restart_alt</span>
-    </div>
+          <div class="mini-toggle">
+            <button class="btn" id="minimizeBtn" title="Mini bara küçült">
+              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0,'wght' 500,'opsz' 32">open_in_full</span>
+              Mini'ye küçült
+            </button>
+            <button class="btn" id="autoMiniToggle" title="Otomatik mini göster">Oto mini: <strong id="autoMiniState">Kapalı</strong></button>
+          </div>
+        </div>
 
-    <div class="tabs">
-      <div class="tab active" data-mode="clock">Saat</div>
-      <div class="tab" data-mode="stopwatch">Kronometre</div>
-      <div class="tab" data-mode="timer">Zamanlayıcı</div>
+        <!-- mode tabs -->
+        <div class="tabs" role="tablist" aria-label="Modlar">
+          <div class="tab active" data-mode="clock" role="tab"><span class="material-symbols-outlined">schedule</span> Saat</div>
+          <div class="tab" data-mode="stopwatch" role="tab"><span class="material-symbols-outlined">timer</span> Kronometre</div>
+          <div class="tab" data-mode="timerMode" role="tab"><span class="material-symbols-outlined">hourglass_bottom</span> Zamanlayıcı</div>
+          <div class="tab" data-mode="alarm" role="tab"><span class="material-symbols-outlined">alarm</span> Alarm</div>
+        </div>
+
+        <!-- display -->
+        <div class="display" id="displayArea">
+          <div class="big-time" id="bigTime">00:00:00</div>
+          <div class="sub" id="subText">Saat modu</div>
+
+          <div class="controls" id="mainControls">
+            <button class="icon" id="startPause"><span class="material-symbols-outlined">play_arrow</span></button>
+            <button class="icon" id="lapReset"><span class="material-symbols-outlined">restart_alt</span></button>
+            <button class="icon" id="expandBtn" title="Mini'yi aç / kapat"><span class="material-symbols-outlined">picture_in_picture_alt</span></button>
+          </div>
+        </div>
+
+        <!-- optional extra area (laps, countdown label) -->
+        <div id="extraArea"></div>
+      </div>
+
+      <!-- Right column: settings -->
+      <div class="side">
+        <div class="panel">
+          <div class="label">Seçilen Mod</div>
+          <div id="selectedMode" style="font-weight:700">Saat</div>
+        </div>
+
+        <div class="panel" id="timerPanel">
+          <div class="label">Zamanlayıcı Ayarla</div>
+          <div class="row" style="margin-bottom:8px">
+            <input class="input" id="timerMinutes" type="number" min="0" placeholder="Dakika" />
+            <input class="input" id="timerSeconds" type="number" min="0" max="59" placeholder="Saniye" />
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="setTimer">Ayarla</button>
+            <button class="btn" id="clearTimer">Sıfırla</button>
+          </div>
+        </div>
+
+        <div class="panel" id="alarmPanel">
+          <div class="label">Alarm Ekle</div>
+          <div class="row" style="margin-bottom:8px">
+            <input class="input" id="alarmTime" type="time" />
+            <input class="input" id="alarmNote" placeholder="Not (opsiyonel)" />
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="addAlarm">Ekle</button>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="label">Alarmlar</div>
+            <div class="alarms" id="alarmsList">
+              <!-- alarm items -->
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="label">Kısa Yardım</div>
+          <div class="small">- Ana ekranda kontrol: Play / Reset / Expand<br>- Mini'ye küçült: Mini butonu veya 'Mini'ye küçült' tuşu<br>- Mini'den tekrar büyüt: Genişlet (⬆) butonu</div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Mini bar -->
+  <div class="mini-bar" id="miniBar" aria-hidden="true">
+    <div class="mini-left">
+      <div class="mini-thumb" id="miniThumb">⏱</div>
+      <div class="mini-info">
+        <div class="mini-title" id="miniTitle">Saat</div>
+        <div class="mini-time" id="miniTime">00:00:00</div>
+      </div>
+    </div>
+    <div class="mini-controls">
+      <button class="mini-ico" id="miniPrev" title="Önceki"><span class="material-symbols-outlined">skip_previous</span></button>
+      <button class="mini-ico" id="miniPlayPause" title="Başlat/Duraklat"><span class="material-symbols-outlined" id="miniPlayIcon">play_arrow</span></button>
+      <button class="mini-ico" id="miniReset" title="Sıfırla"><span class="material-symbols-outlined">restart_alt</span></button>
+      <button class="mini-ico" id="miniStop" title="Kapat"><span class="material-symbols-outlined">close</span></button>
+    </div>
+  </div>
+
+  <button class="mini-expand" id="miniExpandBtn" style="display:none">Genişlet</button>
+
+  <!-- audio for alarm -->
+  <audio id="alarmAudio">
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YSQAAAA=" type="audio/wav">
+  </audio>
+
   <script>
-    const timeDisplay = document.getElementById("timeDisplay");
-    const startPauseBtn = document.getElementById("startPause");
-    const resetBtn = document.getElementById("reset");
-    const modeTitle = document.getElementById("modeTitle");
-    const tabs = document.querySelectorAll(".tab");
+    /* ===== State ===== */
+    const state = {
+      mode: 'clock', // clock | stopwatch | timerMode | alarm
+      running: false,
+      stopwatch: {secs:0, laps:[]},
+      timer: {secs:300, initial:300},
+      alarms: [], // {timeStr:"HH:MM", note:"", id: epoch}
+      autoMini: false
+    };
 
-    let mode = "clock"; // clock | stopwatch | timer
-    let interval = null;
-    let stopwatchTime = 0;
-    let timerTime = 300; // 5 dk default
-    let running = false;
+    /* ===== Elements ===== */
+    const tabs = document.querySelectorAll('.tab');
+    const selectedModeEl = document.getElementById('selectedMode');
+    const bigTime = document.getElementById('bigTime');
+    const subText = document.getElementById('subText');
+    const startPause = document.getElementById('startPause');
+    const lapReset = document.getElementById('lapReset');
+    const expandBtn = document.getElementById('expandBtn');
+    const extraArea = document.getElementById('extraArea');
+    const minimizeBtn = document.getElementById('minimizeBtn');
+    const miniBar = document.getElementById('miniBar');
+    const miniTitle = document.getElementById('miniTitle');
+    const miniTime = document.getElementById('miniTime');
+    const miniThumb = document.getElementById('miniThumb');
+    const miniPlayPause = document.getElementById('miniPlayPause');
+    const miniPlayIcon = document.getElementById('miniPlayIcon');
+    const miniReset = document.getElementById('miniReset');
+    const miniStop = document.getElementById('miniStop');
+    const miniExpandBtn = document.getElementById('miniExpandBtn');
+    const autoMiniToggle = document.getElementById('autoMiniToggle');
+    const autoMiniState = document.getElementById('autoMiniState');
 
-    function updateDisplay() {
-      if (mode === "clock") {
-        const now = new Date();
-        timeDisplay.textContent = now.toLocaleTimeString("tr-TR");
-      } else if (mode === "stopwatch") {
-        let sec = stopwatchTime % 60;
-        let min = Math.floor(stopwatchTime / 60) % 60;
-        let hr = Math.floor(stopwatchTime / 3600);
-        timeDisplay.textContent =
-          String(hr).padStart(2, "0") + ":" +
-          String(min).padStart(2, "0") + ":" +
-          String(sec).padStart(2, "0");
-      } else if (mode === "timer") {
-        let sec = timerTime % 60;
-        let min = Math.floor(timerTime / 60) % 60;
-        let hr = Math.floor(timerTime / 3600);
-        timeDisplay.textContent =
-          String(hr).padStart(2, "0") + ":" +
-          String(min).padStart(2, "0") + ":" +
-          String(sec).padStart(2, "0");
-      }
+    const timerMinutes = document.getElementById('timerMinutes');
+    const timerSeconds = document.getElementById('timerSeconds');
+    const setTimer = document.getElementById('setTimer');
+    const clearTimer = document.getElementById('clearTimer');
+
+    const alarmTime = document.getElementById('alarmTime');
+    const alarmNote = document.getElementById('alarmNote');
+    const addAlarm = document.getElementById('addAlarm');
+    const alarmsList = document.getElementById('alarmsList');
+
+    const alarmAudio = document.getElementById('alarmAudio');
+
+    let intervalId = null;
+
+    /* ===== Helpers ===== */
+    function pad(n){ return String(n).padStart(2,'0') }
+
+    function formatHMS(secs){
+      const h = Math.floor(secs/3600);
+      const m = Math.floor((secs%3600)/60);
+      const s = secs%60;
+      return `${pad(h)}:${pad(m)}:${pad(s)}`;
     }
 
-    function startPause() {
-      if (running) {
-        clearInterval(interval);
-        startPauseBtn.textContent = "play_arrow";
-        running = false;
+    function nowTimeStr(){
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function timeHMnow(){
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    /* ===== UI update ===== */
+    function refreshUI(){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===state.mode));
+      selectedModeEl.textContent = state.mode === 'clock' ? 'Saat' : state.mode === 'stopwatch' ? 'Kronometre' : state.mode === 'timerMode' ? 'Zamanlayıcı' : 'Alarm';
+      miniTitle.textContent = selectedModeEl.textContent;
+      miniThumb.textContent = state.mode === 'clock' ? '🕒' : state.mode === 'stopwatch' ? '⏱' : state.mode === 'timerMode' ? '⏳' : '🔔';
+
+      // main display
+      if(state.mode === 'clock'){
+        bigTime.textContent = nowTimeStr();
+        subText.textContent = 'Gerçek zamanlı saat';
+      } else if(state.mode === 'stopwatch'){
+        bigTime.textContent = formatHMS(state.stopwatch.secs);
+        subText.textContent = `Kronometre — ${state.stopwatch.laps.length} tur`;
+      } else if(state.mode === 'timerMode'){
+        bigTime.textContent = formatHMS(state.timer.secs);
+        subText.textContent = `Zamanlayıcı — ${formatHMS(state.timer.initial)} başlangıç`;
+      } else if(state.mode === 'alarm'){
+        bigTime.textContent = nowTimeStr();
+        subText.textContent = 'Alarm listesi';
+      }
+
+      // extra area content per mode
+      renderExtraArea();
+
+      // mini bar time
+      if(state.mode === 'clock'){
+        miniTime.textContent = nowTimeStr();
+      } else if(state.mode === 'stopwatch'){
+        miniTime.textContent = formatHMS(state.stopwatch.secs);
+      } else if(state.mode === 'timerMode'){
+        miniTime.textContent = formatHMS(state.timer.secs);
       } else {
-        if (mode === "stopwatch") {
-          interval = setInterval(() => {
-            stopwatchTime++;
-            updateDisplay();
-            timeDisplay.classList.add("animate");
-            setTimeout(() => timeDisplay.classList.remove("animate"), 200);
-          }, 1000);
-        } else if (mode === "timer") {
-          interval = setInterval(() => {
-            if (timerTime > 0) {
-              timerTime--;
-              updateDisplay();
-              timeDisplay.classList.add("animate");
-              setTimeout(() => timeDisplay.classList.remove("animate"), 200);
-            } else {
-              clearInterval(interval);
-              alert("Süre doldu!");
-            }
-          }, 1000);
+        miniTime.textContent = timeHMnow();
+      }
+
+      // play/pause icons
+      const iconName = state.running ? 'pause' : 'play_arrow';
+      document.getElementById('startPause').querySelector('.material-symbols-outlined').textContent = state.running ? 'pause' : 'play_arrow';
+      miniPlayIcon.textContent = state.running ? 'pause' : 'play_arrow';
+    }
+
+    function renderExtraArea(){
+      extraArea.innerHTML = '';
+      if(state.mode === 'stopwatch'){
+        // laps
+        const wrap = document.createElement('div');
+        wrap.className = 'panel';
+        wrap.innerHTML = `<div class="label">Turlar</div>`;
+        const list = document.createElement('div');
+        list.style.display='flex'; list.style.flexDirection='column'; list.style.gap='8px';
+        if(state.stopwatch.laps.length===0){
+          list.innerHTML = `<div class="small">Henüz tur yok. (Start basınca tur eklemek için 'Tur' fonksiyonu geliştirilebilir)</div>`;
+        } else {
+          state.stopwatch.laps.slice().reverse().forEach((s,i)=>{
+            const el = document.createElement('div');
+            el.className='alarm-item';
+            el.innerHTML = `<div class="meta"><div class="alarm-time">${formatHMS(s)}</div><div class="alarm-note">Tur ${state.stopwatch.laps.length - i}</div></div>`;
+            list.appendChild(el);
+          });
         }
-        startPauseBtn.textContent = "pause";
-        running = true;
+        wrap.appendChild(list);
+        extraArea.appendChild(wrap);
+      } else if(state.mode === 'alarm'){
+        // list already in side; show short help
+        const wrap = document.createElement('div');
+        wrap.className='panel';
+        wrap.innerHTML = `<div class="label">Not</div><div class="small">Eklediğin alarmlar listede görünür. Alarm zamanı gelince ses çalar ve bildirim verir.</div>`;
+        extraArea.appendChild(wrap);
+      } else if(state.mode === 'timerMode'){
+        const wrap = document.createElement('div');
+        wrap.className='panel';
+        wrap.innerHTML = `<div class="label">Durum</div><div class="small">${state.timer.secs === 0 ? 'Süre tamamlandı' : 'Çalışıyor mı: ' + (state.running ? 'Evet' : 'Hayır')}</div>`;
+        extraArea.appendChild(wrap);
+      } else {
+        // clock no extras
       }
     }
 
-    function reset() {
-      clearInterval(interval);
-      running = false;
-      startPauseBtn.textContent = "play_arrow";
-      if (mode === "stopwatch") {
-        stopwatchTime = 0;
-      } else if (mode === "timer") {
-        timerTime = 300;
-      }
-      updateDisplay();
-    }
-
-    tabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        tabs.forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        mode = tab.dataset.mode;
-        modeTitle.textContent =
-          mode === "clock" ? "Saat" :
-          mode === "stopwatch" ? "Kronometre" : "Zamanlayıcı";
-        reset();
-        if (mode === "clock") {
-          setInterval(updateDisplay, 1000);
-        }
+    /* ===== Tab switching ===== */
+    tabs.forEach(t=>{
+      t.addEventListener('click', ()=>{
+        state.mode = t.dataset.mode;
+        state.running = false; // reset running when switching for predictability
+        stopInterval();
+        refreshUI();
       });
     });
 
-    startPauseBtn.addEventListener("click", startPause);
-    resetBtn.addEventListener("click", reset);
+    /* ===== Interval management and ticking ===== */
+    function startInterval(){
+      if(intervalId) return;
+      intervalId = setInterval(()=> {
+        // tick every second
+        if(state.mode==='clock'){
+          // nothing special
+        } else if(state.mode==='stopwatch' && state.running){
+          state.stopwatch.secs++;
+        } else if(state.mode==='timerMode' && state.running){
+          if(state.timer.secs>0){
+            state.timer.secs--;
+            if(state.timer.secs===0){
+              onTimerFinish();
+            }
+          }
+        }
+        // alarms check each minute (but also check seconds)
+        checkAlarms();
+        refreshUI();
+      }, 1000);
+    }
 
-    // Başlangıçta saati sürekli güncelle
-    setInterval(() => {
-      if (mode === "clock") updateDisplay();
-    }, 1000);
+    function stopInterval(){
+      clearInterval(intervalId);
+      intervalId = null;
+    }
 
-    updateDisplay();
+    /* ===== Controls: start/pause/reset - main */ 
+    document.getElementById('startPause').addEventListener('click', ()=>{
+      toggleRun();
+    });
+
+    function toggleRun(){
+      state.running = !state.running;
+      if(state.running) startInterval();
+      else {
+        // keep ticking only for clock; if nothing runs we can stop interval to save CPU
+        if(state.mode === 'clock'){} else stopInterval();
+      }
+      refreshUI();
+      // if autoMini enabled and just started, show mini
+      if(state.autoMini && state.running) showMini();
+    }
+
+    document.getElementById('lapReset').addEventListener('click', ()=>{
+      if(state.mode==='stopwatch'){
+        if(state.running){
+          // add lap
+          state.stopwatch.laps.push(state.stopwatch.secs);
+        } else {
+          // reset
+          state.stopwatch.secs = 0;
+          state.stopwatch.laps = [];
+        }
+      } else if(state.mode==='timerMode'){
+        // reset timer to initial
+        state.timer.secs = state.timer.initial;
+        state.running = false;
+        stopInterval();
+      } else {
+        // nothing
+      }
+      refreshUI();
+    });
+
+    expandBtn.addEventListener('click', ()=>{ // toggle mini bar
+      if(isMiniVisible()) hideMini();
+      else showMini();
+    });
+
+    minimizeBtn.addEventListener('click', ()=>{
+      // user wants to minimize to mini bar
+      showMini();
+    });
+
+    /* ===== Mini bar controls ===== */
+    function showMini(){
+      miniBar.classList.add('show');
+      miniBar.setAttribute('aria-hidden','false');
+      miniExpandBtn.style.display = 'inline-block';
+    }
+    function hideMini(){
+      miniBar.classList.remove('show');
+      miniBar.setAttribute('aria-hidden','true');
+      miniExpandBtn.style.display = 'none';
+    }
+    function isMiniVisible(){ return miniBar.classList.contains('show') }
+
+    miniPlayPause.addEventListener('click', ()=>{
+      toggleRun();
+    });
+    miniReset.addEventListener('click', ()=>{
+      if(state.mode==='stopwatch'){ state.stopwatch.secs = 0; state.stopwatch.laps=[]; }
+      else if(state.mode==='timerMode'){ state.timer.secs = state.timer.initial; state.running=false; stopInterval(); }
+      else if(state.mode==='alarm'){ /* nothing */ }
+      refreshUI();
+    });
+    miniStop.addEventListener('click', ()=>{
+      // hide mini
+      hideMini();
+    });
+
+    miniExpandBtn.addEventListener('click', ()=>{
+      hideMini();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+
+    /* ===== Timer setup ===== */
+    setTimer.addEventListener('click', ()=>{
+      const mins = parseInt(timerMinutes.value || 0);
+      const secs = parseInt(timerSeconds.value || 0);
+      const total = Math.max(0, mins*60 + secs);
+      if(total === 0){ alert('Lütfen 0'dan büyük bir süre gir.'); return; }
+      state.timer.secs = total;
+      state.timer.initial = total;
+      state.mode = 'timerMode';
+      state.running = false;
+      stopInterval();
+      refreshUI();
+      showMini();
+    });
+
+    clearTimer.addEventListener('click', ()=>{
+      state.timer.secs = 300;
+      state.timer.initial = 300;
+      state.running = false;
+      stopInterval();
+      refreshUI();
+    });
+
+    /* ===== Alarmlar ===== */
+    function renderAlarms(){
+      alarmsList.innerHTML = '';
+      if(state.alarms.length===0){
+        alarmsList.innerHTML = `<div class="small">Henüz alarm yok.</div>`;
+        return;
+      }
+      state.alarms.forEach(a=>{
+        const div = document.createElement('div');
+        div.className='alarm-item';
+        div.innerHTML = `<div class="meta"><div class="alarm-time">${a.timeStr}</div><div class="alarm-note">${a.note||'—'}</div></div>
+                        <div style="display:flex;gap:8px;align-items:center">
+                          <button class="btn" data-id="${a.id}" title="Kaldır">Sil</button>
+                        </div>`;
+        alarmsList.appendChild(div);
+      });
+      // attach delete
+      alarmsList.querySelectorAll('button.btn').forEach(b=>{
+        b.addEventListener('click', e=>{
+          const id = Number(b.dataset.id);
+          state.alarms = state.alarms.filter(x=>x.id!==id);
+          renderAlarms();
+        });
+      });
+    }
+
+    addAlarm.addEventListener('click', ()=>{
+      const t = alarmTime.value;
+      if(!t){ alert('Lütfen zaman seç.'); return; }
+      const note = alarmNote.value.trim();
+      const id = Date.now() + Math.floor(Math.random()*999);
+      state.alarms.push({timeStr:t, note, id});
+      renderAlarms();
+      // reset fields
+      alarmTime.value=''; alarmNote.value='';
+      state.mode='alarm';
+      refreshUI();
+      showMini();
+    });
+
+    function checkAlarms(){
+      if(state.alarms.length===0) return;
+      const hm = timeHMnow(); // "HH:MM"
+      // check match
+      state.alarms.forEach(a=>{
+        if(a.timeStr === hm){
+          // fire alarm: play and show
+          onAlarmTriggered(a);
+          // remove if you prefer one-time; here we remove to avoid repeat each second for the minute:
+          state.alarms = state.alarms.filter(x=>x.id !== a.id);
+          renderAlarms();
+        }
+      });
+    }
+
+    function onAlarmTriggered(alarm){
+      // play sound
+      try{ alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }catch(e){}
+      // visible alert + expand app
+      showMini();
+      hideMini(); // flash
+      showMini();
+      alert(`⏰ Alarm: ${alarm.note || alarm.timeStr}`);
+    }
+
+    function onTimerFinish(){
+      try{ alarmAudio.currentTime = 0; alarmAudio.play().catch(()=>{}); }catch(e){}
+      alert('⏳ Zamanlayıcı bitti!');
+      state.running = false;
+      stopInterval();
+    }
+
+    /* ===== Auto mini toggle (button) ===== */
+    autoMiniToggle.addEventListener('click', ()=>{
+      state.autoMini = !state.autoMini;
+      autoMiniState.textContent = state.autoMini ? 'Açık' : 'Kapalı';
+      if(state.autoMini && state.running) showMini();
+    });
+
+    /* ===== Keep clock updating faster for feel ===== */
+    setInterval(()=>{ if(state.mode==='clock') refreshUI(); }, 1000);
+
+    /* ===== Start initial UI ===== */
+    refreshUI();
+
+    /* ===== Small UX niceties: keyboard shortcuts ===== */
+    document.addEventListener('keydown', e=>{
+      if(e.code==='Space'){ e.preventDefault(); toggleRun(); }
+      if(e.key==='m' || e.key==='M'){ isMiniVisible()?hideMini():showMini(); }
+      if(e.key==='r' || e.key==='R'){ // reset context-sensitive
+        miniReset.click();
+      }
+    });
+
+    /* ===== Save/Load alarms from localStorage (simple persistence) ===== */
+    function saveState(){
+      try{ localStorage.setItem('eywallah_clock_state', JSON.stringify({alarms:state.alarms, timer:state.timer})); }catch(e){}
+    }
+    function loadState(){
+      try{
+        const raw = localStorage.getItem('eywallah_clock_state');
+        if(raw){
+          const obj = JSON.parse(raw);
+          if(obj.alarms) state.alarms = obj.alarms;
+          if(obj.timer) state.timer = obj.timer;
+        }
+      }catch(e){}
+    }
+    window.addEventListener('beforeunload', saveState);
+    loadState();
+    renderAlarms();
+    refreshUI();
   </script>
 </body>
 </html>

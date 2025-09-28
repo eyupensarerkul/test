@@ -1,123 +1,266 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material Notlar Uygulaması</title>
-    
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    
-    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
-    
-    <style>
-        body {
-            background-color: #f4f4f4; /* Hafif gri arka plan */
-            margin: 0;
-            padding-bottom: 80px; /* Snackbar için boşluk */
-        }
-        .mdc-top-app-bar {
-            background-color: #6750A4; /* Material 3 Primary rengi */
-            color: white;
-        }
-        .container {
-            padding: 20px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .note-card {
-            margin-bottom: 16px;
-        }
-        /* Floating Action Button (FAB) Konumlandırması */
-        .mdc-fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-        }
-        /* Snackbar için görünüm ayarları */
-        .mdc-snackbar__label {
-            font-size: 1rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eywallah Saat</title>
+
+<!-- Material Symbols -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=play_arrow,pause,delete,refresh,expand_more,expand_less" />
+<style>
+body{margin:0;font-family:Roboto,sans-serif;background:#111;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;padding:20px;}
+h1{text-align:center;}
+.tabs{display:flex;gap:10px;margin-bottom:20px;}
+.tab{padding:10px 20px;border-radius:10px;background:#222;cursor:pointer;transition:0.3s;}
+.tab.active{background:#1DE9B6;color:#000;font-weight:700;}
+#bigTime{font-size:4rem;margin:20px 0;}
+#subText{font-size:1rem;color:#aaa;}
+.buttons{display:flex;gap:10px;margin:10px 0;}
+button{padding:10px 20px;border:none;border-radius:8px;background:#1DE9B6;color:#000;cursor:pointer;transition:0.3s;font-size:1rem;display:flex;align-items:center;gap:5px;}
+button:hover{background:#14a28a;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+#extraArea{margin-top:20px;display:flex;flex-direction:column;gap:10px;}
+#miniBar{position:fixed;bottom:0;left:0;width:100%;background:#222;display:flex;justify-content:space-between;align-items:center;padding:10px;transform:translateY(100%);transition:0.3s;}
+#miniBar.show{transform:translateY(0);}
+.mini-left,.mini-right{display:flex;align-items:center;gap:10px;}
+.mini-title{font-weight:700;}
+.mini-ico{background:transparent;color:#fff;border:none;cursor:pointer;}
+input{padding:5px;border-radius:5px;border:none;width:70px;}
+.alarm-item{display:flex;justify-content:space-between;align-items:center;background:#333;padding:5px 10px;border-radius:8px;margin-top:5px;}
+</style>
 </head>
 <body>
 
-    <header class="mdc-top-app-bar">
-      <div class="mdc-top-app-bar__row">
-        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-          <span class="mdc-top-app-bar__title">Notlarım (Material 3)</span>
-        </section>
-      </div>
-    </header>
+<h1 id="selectedMode">Saat</h1>
+<div class="tabs">
+  <div class="tab active" data-mode="clock">Saat</div>
+  <div class="tab" data-mode="stopwatch">Kronometre</div>
+  <div class="tab" data-mode="timerMode">Zamanlayıcı</div>
+  <div class="tab" data-mode="alarm">Alarm</div>
+</div>
 
-    <div class="container">
-        <h1>Material 3 Notlar</h1>
-        
-        <div class="mdc-layout-grid">
-            <div class="mdc-layout-grid__inner">
-                <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
-                    <div class="mdc-card note-card">
-                        <div class="mdc-card__primary-action mdc-card__ripple">
-                            <div class="mdc-card__media mdc-card__media--16-9"></div>
-                            <div class="demo-card__primary">
-                                <h2 class="demo-card__title mdc-typography mdc-typography--headline6">İlk Not</h2>
-                                <h3 class="demo-card__subtitle mdc-typography mdc-typography--subtitle2">Material Design denemesi.</h3>
-                            </div>
-                            <div class="demo-card__secondary mdc-typography mdc-typography--body2">
-                                Bu, Material bileşenlerini kullanarak oluşturulmuş bir not kartıdır.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="bigTime">00:00:00</div>
+<div id="subText">Saat modu</div>
 
-    <button class="mdc-fab" aria-label="Yeni Not Ekle" id="add-note-button">
-      <div class="mdc-fab__ripple"></div>
-      <span class="mdc-fab__icon material-icons">add</span>
-    </button>
-    
-    <div class="mdc-snackbar mdc-snackbar--leading" aria-live="assertive" aria-atomic="true" aria-hidden="true" id="my-snackbar">
-      <div class="mdc-snackbar__surface" role="status">
-        <div class="mdc-snackbar__label" role="presentation">
-          Not başarıyla kaydedildi!
-        </div>
-        <div class="mdc-snackbar__actions">
-          <button type="button" class="mdc-button mdc-snackbar__action">
-            <div class="mdc-button__ripple"></div>
-            <span class="mdc-button__label">GERİ AL</span>
-          </button>
-        </div>
-      </div>
-    </div>
+<div class="buttons">
+  <button id="startPause"><span class="material-symbols-outlined">play_arrow</span> Başlat</button>
+  <button id="lapReset"><span class="material-symbols-outlined">refresh</span> Sıfırla</button>
+  <button id="expandBtn"><span class="material-symbols-outlined">expand_more</span> Mini Bar</button>
+</div>
 
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+<div id="extraArea">
+  <!-- Timer Controls -->
+  <div id="timerControls">
+    <input type="number" id="timerMinutes" placeholder="Dakika"> :
+    <input type="number" id="timerSeconds" placeholder="Saniye">
+    <button id="setTimer">Ayarla</button>
+    <button id="clearTimer">Temizle</button>
+  </div>
 
-    <script>
-        // MDC Kütüphanesinden gerekli bileşenleri başlatma
-        const MDCSnackbar = mdc.snackbar.MDCSnackbar;
-        const snackbar = new MDCSnackbar(document.getElementById('my-snackbar'));
+  <!-- Alarm Controls -->
+  <div id="alarmControls">
+    <input type="time" id="alarmTime">
+    <input type="text" id="alarmNote" placeholder="Not">
+    <button id="addAlarm">Alarm Ekle</button>
+    <div id="alarmsList"></div>
+    <audio id="alarmAudio" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
+  </div>
 
-        // FAB düğmesini bulma
-        const addButton = document.getElementById('add-note-button');
+  <!-- Auto Mini Toggle -->
+  <div>
+    <button id="autoMiniToggle">Otomatik Mini Bar</button>
+    <span id="autoMiniState">Kapalı</span>
+  </div>
+</div>
 
-        // Düğmeye tıklama olayını ekleme
-        addButton.addEventListener('click', () => {
-            // Not ekleme işlemini simüle et
-            console.log('Yeni not ekleme işlemi tetiklendi...');
-            
-            // Pop-up Bar'ı (Snackbar'ı) göster
-            snackbar.open();
-        });
+<!-- Mini Bar -->
+<div id="miniBar">
+  <div class="mini-left">
+    <span class="mini-title" id="miniTitle">Saat</span>
+    <span id="miniTime">00:00:00</span>
+  </div>
+  <div class="mini-right">
+    <button class="mini-ico" id="miniPlayPause"><span class="material-symbols-outlined" id="miniPlayIcon">play_arrow</span></button>
+    <button class="mini-ico" id="miniReset"><span class="material-symbols-outlined">refresh</span></button>
+    <button class="mini-ico" id="miniStop"><span class="material-symbols-outlined">expand_less</span></button>
+  </div>
+</div>
 
-        // İsteğe bağlı: Snackbar'daki "GERİ AL" düğmesi için bir dinleyici ekleme
-        snackbar.listen('MDCSnackbar:action', () => {
-            console.log('Geri Al butonu tıklandı. İşlem geri alınıyor...');
-        });
+<script>
+/* ===== State ===== */
+const state = {
+  mode: 'clock',
+  running: false,
+  stopwatch: {secs:0, laps:[]},
+  timer: {secs:300, initial:300},
+  alarms: [],
+  autoMini: false
+};
 
-        // Sayfadaki tüm bileşenler için MDC başlatma (Ripple efektleri vb.)
-        mdc.autoInit();
-    </script>
+/* ===== Elements ===== */
+const tabs = document.querySelectorAll('.tab');
+const selectedModeEl = document.getElementById('selectedMode');
+const bigTime = document.getElementById('bigTime');
+const subText = document.getElementById('subText');
+const startPause = document.getElementById('startPause');
+const lapReset = document.getElementById('lapReset');
+const expandBtn = document.getElementById('expandBtn');
+const extraArea = document.getElementById('extraArea');
+const miniBar = document.getElementById('miniBar');
+const miniTitle = document.getElementById('miniTitle');
+const miniTime = document.getElementById('miniTime');
+const miniPlayPause = document.getElementById('miniPlayPause');
+const miniPlayIcon = document.getElementById('miniPlayIcon');
+const miniReset = document.getElementById('miniReset');
+const miniStop = document.getElementById('miniStop');
+const autoMiniToggle = document.getElementById('autoMiniToggle');
+const autoMiniState = document.getElementById('autoMiniState');
+
+const timerMinutes = document.getElementById('timerMinutes');
+const timerSeconds = document.getElementById('timerSeconds');
+const setTimer = document.getElementById('setTimer');
+const clearTimer = document.getElementById('clearTimer');
+
+const alarmTime = document.getElementById('alarmTime');
+const alarmNote = document.getElementById('alarmNote');
+const addAlarm = document.getElementById('addAlarm');
+const alarmsList = document.getElementById('alarmsList');
+const alarmAudio = document.getElementById('alarmAudio');
+
+/* ===== Helpers ===== */
+function fmt(secs){
+  const h=Math.floor(secs/3600);
+  const m=Math.floor((secs%3600)/60);
+  const s=secs%60;
+  return (h>0?String(h).padStart(2,"0")+":":"")+
+         String(m).padStart(2,"0")+":"+
+         String(s).padStart(2,"0");
+}
+function nowTimeStr(){
+  const d=new Date();
+  return d.toLocaleTimeString("tr-TR",{hour12:false});
+}
+
+/* ===== Render Loop ===== */
+setInterval(()=>{
+  if(state.mode==="clock"){
+    bigTime.textContent=nowTimeStr();
+    subText.textContent="Saat modu";
+  }
+  if(state.mode==="stopwatch"){
+    if(state.running) state.stopwatch.secs++;
+    bigTime.textContent=fmt(state.stopwatch.secs);
+    subText.textContent=state.running?"Kronometre çalışıyor":"Durduruldu";
+  }
+  if(state.mode==="timerMode"){
+    if(state.running && state.timer.secs>0){
+      state.timer.secs--;
+      if(state.timer.secs<=0){
+        state.running=false;
+        alarmAudio.play();
+        alert("⏰ Zamanlayıcı bitti!");
+      }
+    }
+    bigTime.textContent=fmt(state.timer.secs);
+    subText.textContent="Zamanlayıcı";
+  }
+  if(state.mode==="alarm"){
+    bigTime.textContent=nowTimeStr();
+    subText.textContent="Alarm modu";
+    const d=new Date();
+    const hh=String(d.getHours()).padStart(2,"0");
+    const mm=String(d.getMinutes()).padStart(2,"0");
+    const current=hh+":"+mm;
+    state.alarms.forEach(al=>{
+      if(al.timeStr===current && !al.triggered){
+        al.triggered=true;
+        alarmAudio.play();
+        alert("🔔 Alarm: "+(al.note||""));
+      }
+    });
+  }
+  if(miniBar.classList.contains("show")){
+    miniTitle.textContent=state.mode;
+    miniTime.textContent=bigTime.textContent;
+  }
+},1000);
+
+/* ===== Events ===== */
+tabs.forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    tabs.forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    state.mode=tab.dataset.mode;
+    selectedModeEl.textContent=tab.textContent.trim();
+    if(state.autoMini) showMini();
+  });
+});
+
+startPause.addEventListener("click",()=>{
+  state.running=!state.running;
+  startPause.innerHTML=`<span class="material-symbols-outlined">${state.running?"pause":"play_arrow"}</span> Başlat`;
+});
+lapReset.addEventListener("click",()=>{
+  if(state.mode==="stopwatch"){ state.stopwatch.secs=0; }
+  if(state.mode==="timerMode"){ state.timer.secs=state.timer.initial; }
+});
+expandBtn.addEventListener("click",()=>{ showMini(); });
+
+miniPlayPause.addEventListener("click",()=>{
+  state.running=!state.running;
+  miniPlayIcon.textContent=state.running?"pause":"play_arrow";
+  startPause.innerHTML=`<span class="material-symbols-outlined">${state.running?"pause":"play_arrow"}</span> Başlat`;
+});
+miniReset.addEventListener("click",()=>{
+  if(state.mode==="stopwatch"){ state.stopwatch.secs=0; }
+  if(state.mode==="timerMode"){ state.timer.secs=state.timer.initial; }
+});
+miniStop.addEventListener("click",()=>{ hideMini(); });
+
+autoMiniToggle.addEventListener("click",()=>{
+  state.autoMini=!state.autoMini;
+  autoMiniState.textContent=state.autoMini?"Açık":"Kapalı";
+});
+
+/* Timer settings */
+setTimer.addEventListener("click",()=>{
+  const mins=parseInt(timerMinutes.value||0);
+  const secs=parseInt(timerSeconds.value||0);
+  state.timer.secs=mins*60+secs;
+  state.timer.initial=state.timer.secs;
+});
+clearTimer.addEventListener("click",()=>{
+  state.timer.secs=0; state.timer.initial=0;
+});
+
+/* Alarms */
+addAlarm.addEventListener("click",()=>{
+  if(!alarmTime.value) return;
+  const id=Date.now();
+  const al={timeStr:alarmTime.value, note:alarmNote.value, id, triggered:false};
+  state.alarms.push(al);
+  renderAlarms();
+  alarmTime.value=""; alarmNote.value="";
+});
+function renderAlarms(){
+  alarmsList.innerHTML="";
+  state.alarms.forEach(al=>{
+    const div=document.createElement("div");
+    div.className="alarm-item";
+    div.innerHTML=`<div class="meta"><span class="alarm-time">${al.timeStr}</span><span class="alarm-note">${al.note||""}</span></div>
+      <button class="mini-ico" onclick="removeAlarm(${al.id})"><span class="material-symbols-outlined">delete</span></button>`;
+    alarmsList.appendChild(div);
+  });
+}
+window.removeAlarm=(id)=>{
+  state.alarms=state.alarms.filter(a=>a.id!==id);
+  renderAlarms();
+};
+
+/* Mini functions */
+function showMini(){ miniBar.classList.add("show"); }
+function hideMini(){ miniBar.classList.remove("show"); }
+</script>
+
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimalist Material Notlar (M3)</title>
+    <title>Material Notlar (Chips ve Kategoriler)</title>
     
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
     
@@ -21,28 +21,31 @@
             font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
             color: #4CAF50;
         }
-        /* Minimalist Kart Stili */
-        .note-card { 
-            border-radius: 12px; /* Daha yumuşak köşeler */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Daha hafif gölge */
-            transition: box-shadow 0.2s;
-        }
-        .note-card:hover {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15); 
-        }
-        .note-card--completed .mdc-card__primary-action { 
-            background-color: #f0f0f0; 
-            opacity: 0.8;
-            text-decoration: none; /* Metin üstü çizili olmasın, minimalist */
-        }
+        .note-card { border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: box-shadow 0.2s; }
+        .note-card:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+        .note-card--completed .mdc-card__primary-action { background-color: #f0f0f0; opacity: 0.8; text-decoration: none; }
         .mdc-fab { position: fixed; bottom: 24px; right: 24px; z-index: 10; }
-
-        /* Başlık ve Filtre için daha profesyonel bir düzen */
-        .header-section {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* Kategori (Chip) Stilleri */
+        #project-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px; /* Cipsler arası boşluk */
             margin-bottom: 20px;
+        }
+        .mdc-chip-set--filter .mdc-chip {
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        /* Seçili Chip Stili (Material 3 dolgulu) */
+        .mdc-chip-set--filter .mdc-chip--selected {
+            background-color: #6750A4; /* Primary renk */
+            color: white;
+            font-weight: 500;
+        }
+        .mdc-chip-set--filter .mdc-chip--selected .mdc-chip__icon--leading {
+            color: white !important;
         }
     </style>
 </head>
@@ -51,34 +54,19 @@
     <header class="mdc-top-app-bar">
       <div class="mdc-top-app-bar__row">
         <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-          <span class="mdc-top-app-bar__title">Minimal Notlar</span>
+          <span class="mdc-top-app-bar__title">Material Notlar</span>
+        </section>
+        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+            <button class="mdc-icon-button material-symbols-outlined" id="manage-projects-button" title="Kategorileri Yönet">settings</button>
         </section>
       </div>
     </header>
 
     <div class="container">
-        <div class="header-section">
-             <h1 style="margin: 0;">Projeler</h1>
-             
-             <div class="mdc-select mdc-select--filled" style="width: 250px;">
-                <div class="mdc-select__anchor" role="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="project-filter-label project-filter-selected-text">
-                  <span class="mdc-select__ripple"></span>
-                  <span id="project-filter-label" class="mdc-floating-label">Filtrele</span>
-                  <span class="mdc-select__selected-text-container">
-                    <span id="project-filter-selected-text" class="mdc-select__selected-text">Tüm Projeler</span>
-                  </span>
-                  <span class="mdc-select__dropdown-icon">
-                    <span class="material-symbols-outlined" style="font-size: 20px;">arrow_drop_down</span>
-                  </span>
-                  <span class="mdc-line-ripple"></span>
-                </div>
+        <h1 style="margin: 0;">Projeler / Notlar</h1>
 
-                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
-                  <ul class="mdc-list" role="listbox" aria-label="Project filter selection" id="project-filter-list">
-                  </ul>
-                </div>
+        <div id="project-chips" class="mdc-chip-set mdc-chip-set--filter">
             </div>
-        </div>
 
         <div class="mdc-layout-grid">
             <div class="mdc-layout-grid__inner" id="notes-container">
@@ -149,6 +137,38 @@
       </div>
       <div class="mdc-dialog__scrim"></div>
     </div>
+
+    <div class="mdc-dialog" id="manage-projects-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true">
+                <h2 class="mdc-dialog__title">Kategorileri Yönet</h2>
+                <div class="mdc-dialog__content">
+                    
+                    <ul class="mdc-list" id="project-management-list" style="max-height: 250px; overflow-y: auto;">
+                        </ul>
+
+                    <form id="add-project-form" style="display: flex; gap: 8px; margin-top: 16px;">
+                        <div class="mdc-text-field mdc-text-field--filled" style="flex-grow: 1;">
+                          <input type="text" id="new-project-input" class="mdc-text-field__input" required>
+                          <span class="mdc-floating-label" for="new-project-input">Yeni Kategori Adı</span>
+                          <span class="mdc-line-ripple"></span>
+                        </div>
+                        <button type="submit" class="mdc-button mdc-button--raised" title="Ekle">
+                            <span class="mdc-button__ripple"></span>
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </form>
+                </div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
     
     <div class="mdc-snackbar mdc-snackbar--leading" aria-live="assertive" aria-atomic="true" aria-hidden="true" id="my-snackbar">
       <div class="mdc-snackbar__surface" role="status">
@@ -162,73 +182,114 @@
         const MDCDialog = mdc.dialog.MDCDialog;
         const MDCSelect = mdc.select.MDCSelect;
         const MDCTextField = mdc.textField.MDCTextField;
+        const MDCChipSet = mdc.chips.MDCChipSet;
         
+        // DOM Elementleri
         const notesContainer = document.getElementById('notes-container');
         const addButton = document.getElementById('add-note-button');
         const snackbar = new MDCSnackbar(document.getElementById('my-snackbar'));
+        const projectChipsElement = document.getElementById('project-chips');
 
-        const formDialogElement = document.getElementById('note-form-dialog');
-        const formDialog = new MDCDialog(formDialogElement);
+        // Modallar ve Formlar
+        const formDialog = new MDCDialog(document.getElementById('note-form-dialog'));
+        const manageProjectsDialog = new MDCDialog(document.getElementById('manage-projects-dialog'));
         const noteSubmitForm = document.getElementById('note-submit-form');
+        const addProjectForm = document.getElementById('add-project-form');
+        const projectManagementList = document.getElementById('project-management-list');
+        
+        // MDC Bileşenleri
         const noteTitleInput = new MDCTextField(document.getElementById('note-title-input').closest('.mdc-text-field'));
         const noteContentInput = new MDCTextField(document.getElementById('note-content-input').closest('.mdc-text-field'));
+        const newProjectInput = new MDCTextField(document.getElementById('new-project-input').closest('.mdc-text-field'));
+        
+        // Diğer Elementler
         const noteIdInput = document.getElementById('note-id-input');
-        const deleteNoteButton = document.getElementById('delete-note-button'); // Yeni Sil Düğmesi
+        const deleteNoteButton = document.getElementById('delete-note-button');
+        const manageProjectsButton = document.getElementById('manage-projects-button');
 
         const projectSelectField = document.getElementById('project-select-field');
         const projectListElement = document.getElementById('project-list');
-        const projectFilterElement = document.getElementById('project-filter-list').closest('.mdc-select');
-        let projectSelect, projectFilterSelect;
+        let projectSelect;
 
+        // Sabitler ve Durumlar
         const NOTES_STORAGE_KEY = 'materialNotesAppModal';
         const PROJECTS_STORAGE_KEY = 'materialProjectsApp';
+        const DEFAULT_PROJECTS = ['Genel', 'İş', 'Kişisel'];
         let currentFilter = 'Tüm Projeler';
-        const DEFAULT_PROJECTS = ['Genel', 'İş', 'Kişisel', 'Alışveriş'];
+        let projectChipSet;
 
-        // --- Veri Fonksiyonları (Aynı) ---
-        function getNotes() { /* ... */ return JSON.parse(localStorage.getItem(NOTES_STORAGE_KEY)) || []; }
-        function saveNotes(notes) { /* ... */ localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes)); }
-        function getProjects() { /* ... */ return JSON.parse(localStorage.getItem(PROJECTS_STORAGE_KEY)) || DEFAULT_PROJECTS; }
-        function saveProjects(projects) { /* ... */ localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects)); }
+        // --- Veri Fonksiyonları (Düzeltilmiş) ---
+        function getNotes() { return JSON.parse(localStorage.getItem(NOTES_STORAGE_KEY)) || []; }
+        function saveNotes(notes) { localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes)); }
+        function getProjects() { 
+             let projects = JSON.parse(localStorage.getItem(PROJECTS_STORAGE_KEY));
+             if (!projects || projects.length === 0) {
+                projects = DEFAULT_PROJECTS;
+                saveProjects(projects);
+             }
+             return projects;
+        }
+        function saveProjects(projects) { localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects)); }
+        function findNoteById(id) { return getNotes().find(n => n.id === id); }
         function showSnackbar(message) { snackbar.timeoutMs = 3000; snackbar.data = { message: message }; snackbar.open(); }
         
-        // --- Arayüz ve Render Fonksiyonları ---
+        // --- Render Fonksiyonları ---
 
         function createProjectListItem(projectName) {
-            return `<li class="mdc-list-item" role="option" data-value="${projectName}">
-                      <span class="mdc-list-item__ripple"></span>
-                      <span class="mdc-list-item__text">${projectName}</span>
-                    </li>`;
+            // Not Ekleme/Düzenleme Formu için Select içeriği
+            return `<li class="mdc-list-item" role="option" data-value="${projectName}"><span class="mdc-list-item__ripple"></span><span class="mdc-list-item__text">${projectName}</span></li>`;
         }
 
         function renderProjectSelects() {
             const projects = getProjects();
-            // ... (Proje listelerini doldurma mantığı aynı) ...
+            // Select içeriğini doldur
+            projectListElement.innerHTML = projects.map(createProjectListItem).join('');
             
-            // 1. Not Ekleme/Düzenleme Select'i doldur
-            const selectHtml = projects.map(createProjectListItem).join('');
-            projectListElement.innerHTML = selectHtml;
-            
-            // 2. Filtre Select'i doldur
-            const filterListElement = document.getElementById('project-filter-list');
-            const filterHtml = '<li class="mdc-list-item" role="option" data-value="Tüm Projeler"><span class="mdc-list-item__ripple"></span><span class="mdc-list-item__text">Tüm Projeler</span></li>' + selectHtml;
-            filterListElement.innerHTML = filterHtml;
-
+            // MDC Select bileşenini başlat/yenile
             if (projectSelect) projectSelect.destroy();
             projectSelect = new MDCSelect(projectSelectField);
             
-            if (projectFilterSelect) projectFilterSelect.destroy();
-            projectFilterSelect = new MDCSelect(projectFilterElement);
-            
-            projectFilterSelect.listen('MDCSelect:change', () => {
-                currentFilter = projectFilterSelect.value;
-                renderNotes();
-            });
-            
+            // Varsayılan değeri ayarla
             projectSelect.value = projects.includes('Genel') ? 'Genel' : projects[0];
-            projectFilterSelect.value = currentFilter;
         }
 
+        function createProjectChip(name, isSelected) {
+            const selectedClass = isSelected ? 'mdc-chip--selected' : '';
+            return `
+                <div class="mdc-chip ${selectedClass}" role="row" data-value="${name}">
+                    <div class="mdc-chip__ripple"></div>
+                    ${isSelected ? '<span class="mdc-chip__icon mdc-chip__icon--leading material-symbols-outlined">check</span>' : ''}
+                    <span role="gridcell">
+                        <span class="mdc-chip__primary-action">
+                            <span class="mdc-chip__text">${name}</span>
+                        </span>
+                    </span>
+                </div>
+            `;
+        }
+        
+        function renderProjectChips() {
+            const projects = getProjects();
+            
+            // Tüm Projeler çipini en başta ekle
+            let chipsHtml = createProjectChip('Tüm Projeler', currentFilter === 'Tüm Projeler');
+            
+            // Kullanıcı projelerini ekle
+            chipsHtml += projects.map(name => createProjectChip(name, currentFilter === name)).join('');
+            
+            projectChipsElement.innerHTML = chipsHtml;
+            
+            // ChipSet bileşenini başlat ve olay dinleyicisini ekle
+            if (projectChipSet) projectChipSet.destroy();
+            projectChipSet = new MDCChipSet(projectChipsElement);
+            
+            projectChipSet.listen('MDCChip:interaction', (event) => {
+                currentFilter = event.detail.chipId;
+                renderProjectChips(); // Seçili çipin görünümünü güncelle
+                renderNotes(); // Not listesini filtrele
+            });
+        }
+        
         function createNoteCard(note) {
             const completedClass = note.completed ? 'note-card--completed' : '';
             const projectBadge = note.project ? `<span style="font-size: 12px; font-weight: 500; color: #6750A4; margin-bottom: 4px; display: block;">[${note.project}]</span>` : '';
@@ -254,6 +315,7 @@
         
         function renderNotes() {
             const allNotes = getNotes();
+            
             const notes = allNotes.filter(note => 
                 currentFilter === 'Tüm Projeler' || note.project === currentFilter
             );
@@ -267,37 +329,99 @@
             mdc.autoInit(notesContainer); 
         }
 
-        // --- Olay İşleyicileri ve Form Yönetimi ---
-        
+        function renderManagementList() {
+            const projects = getProjects();
+            projectManagementList.innerHTML = '';
+
+            projects.forEach(project => {
+                const isDefault = DEFAULT_PROJECTS.includes(project);
+                const li = document.createElement('li');
+                li.className = 'mdc-list-item';
+                li.innerHTML = `
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">${project}</span>
+                    <span class="mdc-list-item__meta">
+                        ${isDefault ? 
+                            '' : 
+                            `<button class="mdc-icon-button material-symbols-outlined delete-project-btn" data-project="${project}" title="Sil">delete</button>`
+                        }
+                    </span>
+                `;
+                projectManagementList.appendChild(li);
+            });
+            
+            // Silme Olay Dinleyicileri
+            projectManagementList.querySelectorAll('.delete-project-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const projectName = e.currentTarget.getAttribute('data-project');
+                    if (confirm(`${projectName} kategorisini silmek istediğinizden emin misiniz? (Bu notları silmez.)`)) {
+                        deleteProject(projectName);
+                    }
+                });
+            });
+            
+            mdc.autoInit(projectManagementList);
+        }
+
+        function deleteProject(projectName) {
+            let projects = getProjects().filter(p => p !== projectName);
+            saveProjects(projects);
+
+            // Silinen kategori filtreleniyorsa, filtreyi 'Tüm Projeler' yap
+            if (currentFilter === projectName) {
+                currentFilter = 'Tüm Projeler';
+            }
+            
+            // Silinen kategoriye sahip notların projesini 'Genel' yap
+            let notes = getNotes();
+            notes = notes.map(note => {
+                if (note.project === projectName) {
+                    note.project = 'Genel';
+                }
+                return note;
+            });
+            saveNotes(notes);
+
+            showSnackbar(`${projectName} kategorisi silindi.`);
+            renderManagementList();
+            renderProjectSelects();
+            renderProjectChips();
+            renderNotes();
+        }
+
+        // --- Olay İşleyicileri ---
+
         function openNewNoteDialog() {
+            // ... (Yeni not modunda formu temizleme mantığı aynı) ...
             noteTitleInput.value = '';
             noteContentInput.value = '';
             noteIdInput.value = '';
             projectSelect.value = 'Genel';
             document.getElementById('form-dialog-title').textContent = 'Yeni Not';
-            deleteNoteButton.style.display = 'none'; // Yeni not eklerken silme butonu gizlenir
+            deleteNoteButton.style.display = 'none';
             formDialog.open();
         }
 
         function editNote(id) {
-            const note = getNotes().find(n => n.id === id);
+            const note = findNoteById(id);
             if (note) {
-                noteTitleInput.value = note.title;
-                noteContentInput.value = note.content;
+                noteTitleInput.value = note.title; 
+                noteContentInput.value = note.content; 
                 noteIdInput.value = note.id;
                 projectSelect.value = note.project || 'Genel';
                 document.getElementById('form-dialog-title').textContent = 'Notu Düzenle';
-                deleteNoteButton.style.display = 'inline-flex'; // Düzenlerken gösterilir
+                deleteNoteButton.style.display = 'inline-flex';
                 formDialog.open();
             }
         }
         
+        // Not Kaydetme/Güncelleme
         noteSubmitForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            // ... (Kaydetme/Güncelleme mantığı aynı) ...
+            
             const id = noteIdInput.value ? parseInt(noteIdInput.value) : null;
-            const title = noteTitleInput.value.trim();
-            const content = noteContentInput.value.trim();
+            const title = noteTitleInput.value.trim(); 
+            const content = noteContentInput.value.trim(); 
             const project = projectSelect.value;
 
             if (title === "" || content === "") {
@@ -306,13 +430,16 @@
             }
 
             let notes = getNotes();
+
             if (id) {
+                // Düzenleme (Update)
                 const noteIndex = notes.findIndex(n => n.id === id);
                 if (noteIndex !== -1) {
                     notes[noteIndex] = { ...notes[noteIndex], title, content, project };
                     showSnackbar("Not güncellendi.");
                 }
             } else {
+                // Yeni Not Ekleme (Create)
                 const newNote = {
                     id: Date.now(), title: title, content: content, project: project, date: new Date().toISOString(), completed: false
                 };
@@ -325,35 +452,51 @@
             formDialog.close();
         });
 
-        // Silme İşlemi (Metin yerine sadece logo)
-        deleteNoteButton.addEventListener('click', () => {
-            const id = parseInt(noteIdInput.value);
-            if (id && confirm("Bu notu silmek istediğinizden emin misiniz?")) {
-                let notes = getNotes();
-                notes = notes.filter(n => n.id !== id);
-                saveNotes(notes);
-                renderNotes();
-                showSnackbar("Not silindi.");
-                formDialog.close();
+        // Yeni Proje Ekleme
+        addProjectForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const newProjectName = newProjectInput.value.trim();
+            
+            if (newProjectName && !getProjects().includes(newProjectName)) {
+                let projects = getProjects();
+                projects.push(newProjectName);
+                saveProjects(projects);
+                newProjectInput.value = '';
+                newProjectInput.foundation.deactivateFocus(); // Odakı kaldır
+                
+                showSnackbar(`${newProjectName} kategorisi eklendi.`);
+                renderManagementList();
+                renderProjectSelects();
+                renderProjectChips();
+            } else if (getProjects().includes(newProjectName)) {
+                showSnackbar("Bu kategori zaten mevcut.");
             }
+        });
+
+        // Kategori Yönetim Modalını Açma
+        manageProjectsButton.addEventListener('click', () => {
+            renderManagementList();
+            manageProjectsDialog.open();
         });
         
         // --- Uygulama Başlatma ---
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Başlangıç notu ekle
             const initialNotes = getNotes();
             if (initialNotes.length === 0) {
-                 const sampleNote = { id: 1, title: "Minimalist Başlangıç", content: "Notlar daha yumuşak köşelere ve minimalist bir gölgeye sahip. Tüm butonlar artık sadece simgelerden oluşuyor.", project: "Genel", date: new Date().toISOString(), completed: false };
+                 const sampleNote = { id: 1, title: "Kategori Baloncukları", content: "Üstteki baloncuklara (Chips) tıklayarak notları filtreleyebilirsiniz. Ayarlar simgesiyle kategori ekleyip silebilirsiniz.", project: "Genel", date: new Date().toISOString(), completed: false };
                 initialNotes.push(sampleNote);
                 saveNotes(initialNotes);
             }
             
-            renderProjectSelects();
+            // Bileşenleri başlat
+            mdc.autoInit();
+            renderProjectSelects(); // Formdaki select için
+            renderProjectChips(); // Filtre baloncukları için
             renderNotes();
             
             addButton.addEventListener('click', openNewNoteDialog);
-            
-            mdc.autoInit();
         });
     </script>
 </body>

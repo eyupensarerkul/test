@@ -3,501 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material Notlar (Chips ve Kategoriler)</title>
-    
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
-    
+    <title>Minimal Görev Yönetim Panosu</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    
-    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
-    
     <style>
-        /* CSS Değişken Eksen Ayarları */
-        .material-symbols-outlined { 
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            font-size: 24px;
+        /* CSS STİLLERİ (Öncekine Eklemeler ve İyileştirmeler) */
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc; 
+            --secondary-color: #03dac6; 
+            --card-bg: #1e1e1e;
+            --border-color: #333333;
+            --error-color: #cf6679; /* Kırmızımsı hata/silme rengi */
         }
-        .note-card--completed .material-symbols-outlined {
-            font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
-            color: #4CAF50;
-        }
-        .note-card { border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: box-shadow 0.2s; }
-        .note-card:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
-        .note-card--completed .mdc-card__primary-action { background-color: #f0f0f0; opacity: 0.8; text-decoration: none; }
-        .mdc-fab { position: fixed; bottom: 24px; right: 24px; z-index: 10; }
-        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        /* Kategori (Chip) Stilleri */
-        #project-chips {
+        /* Genel Stil ve Navigasyon (Kısaltıldı) */
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; padding-bottom: 70px; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 }
+        .board-content { padding: 20px; max-width: 1000px; margin: 0 auto; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; min-height: 80vh; }
+        .tab-content.active { display: block; }
+        .widget-card { background-color: var(--card-bg); padding: 25px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); }
+        h2 { color: var(--primary-color); margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; font-weight: 500; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background-color: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5); z-index: 1000; }
+        .nav-item { color: var(--text-color); text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; cursor: pointer; transition: color 0.2s; font-size: 0.75rem; font-weight: 500; gap: 2px; opacity: 0.6; }
+        .nav-item.active, .nav-item:hover { color: var(--primary-color); opacity: 1; }
+        .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+
+        /* Takvim ve Görev Yönetimi Stilleri */
+        .takvim-baslik, .gorev-ekle { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .takvim-baslik button { background-color: var(--secondary-color); color: var(--bg-color); border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
+        .takvim-gunler { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .takvim-hucre { padding: 10px 0; border-radius: 8px; cursor: pointer; transition: background-color 0.2s, color 0.2s; font-size: 0.9rem; position: relative; }
+        .takvim-hucre.dolu:hover { background-color: var(--secondary-color); color: var(--bg-color); }
+        .takvim-hucre.bugun { background-color: var(--primary-color); color: var(--bg-color); font-weight: bold; }
+        
+        .gorevli { 
+            border: 2px solid var(--error-color); 
+            box-shadow: 0 0 5px var(--error-color);
+        }
+
+        /* Görev Listesi Stili */
+        #gorev-listesi { margin-top: 20px; padding: 0; list-style: none; }
+        .gorev-item {
+            background-color: var(--bg-color);
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px; /* Cipsler arası boşluk */
-            margin-bottom: 20px;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--secondary-color);
         }
-        .mdc-chip-set--filter .mdc-chip {
+
+        .gorev-sil-btn {
+            background: none;
+            border: none;
+            color: var(--error-color);
             cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
+            padding: 5px;
+            margin-left: 10px;
         }
-        /* Seçili Chip Stili (Material 3 dolgulu) */
-        .mdc-chip-set--filter .mdc-chip--selected {
-            background-color: #6750A4; /* Primary renk */
-            color: white;
-            font-weight: 500;
+
+        .gorev-detay {
+            flex-grow: 1;
         }
-        .mdc-chip-set--filter .mdc-chip--selected .mdc-chip__icon--leading {
-            color: white !important;
+
+        .gorev-detay strong {
+            display: block;
+            font-size: 1.1em;
         }
+
+        .gorev-alarm {
+            font-size: 0.8em;
+            color: var(--primary-color);
+        }
+
+        /* Görev Ekleme Formu Stili */
+        .gorev-ekle input, .gorev-ekle button {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        .gorev-ekle button {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Zil Sesi için gizli Audio elemanı */
+        #alarm-sesi { display: none; }
     </style>
 </head>
 <body>
 
-    <header class="mdc-top-app-bar">
-      <div class="mdc-top-app-bar__row">
-        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-          <span class="mdc-top-app-bar__title">Material Notlar</span>
-        </section>
-        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
-            <button class="mdc-icon-button material-symbols-outlined" id="manage-projects-button" title="Kategorileri Yönet">settings</button>
-        </section>
-      </div>
-    </header>
+    <div class="board-content">
+        
+        <div id="home" class="tab-content active">
+            <div class="widget-card">
+                <h2>Anlık Saat ve Tarih</h2>
+                <div id="saat-gostergesi" class="display-large"></div>
+                <div id="tarih-gostergesi"></div>
+            </div>
+        </div>
 
-    <div class="container">
-        <h1 style="margin: 0;">Projeler / Notlar</h1>
-
-        <div id="project-chips" class="mdc-chip-set mdc-chip-set--filter">
+        <div id="time_management" class="tab-content">
+            <div class="widget-card">
+                <h2>Kronometre (Stopwatch)</h2>
+                <div id="stopwatch-display" class="display-large">00:00:00</div>
+                <div class="timer-controls">
+                    <button id="sw-start-btn" onclick="startStopwatch()"><span class="material-symbols-outlined">play_arrow</span> Başlat</button>
+                    <button id="sw-pause-btn" onclick="pauseStopwatch()" style="display:none;"><span class="material-symbols-outlined">pause</span> Duraklat</button>
+                    <button onclick="resetStopwatch()"><span class="material-symbols-outlined">restart_alt</span> Sıfırla</button>
+                </div>
             </div>
 
-        <div class="mdc-layout-grid">
-            <div class="mdc-layout-grid__inner" id="notes-container">
+            <div class="widget-card">
+                <h2>Geri Sayım Zamanlayıcısı (Timer)</h2>
+                <div class="countdown-setup">
+                    <input type="number" id="timer-hours" value="0" min="0" max="23"> <label>saat</label>
+                    <input type="number" id="timer-minutes" value="5" min="0" max="59"> <label>dakika</label>
+                    <input type="number" id="timer-seconds" value="0" min="0" max="59"> <label>saniye</label>
+                </div>
+                <div id="timer-display" class="display-large">00:05:00</div>
+                <div class="timer-controls">
+                    <button id="timer-start-btn" onclick="startTimer()"><span class="material-symbols-outlined">play_arrow</span> Başlat</button>
+                    <button id="timer-pause-btn" onclick="pauseTimer()" style="display:none;"><span class="material-symbols-outlined">pause</span> Duraklat</button>
+                    <button onclick="resetTimer()"><span class="material-symbols-outlined">restart_alt</span> Sıfırla</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="notes" class="tab-content">
+            <div class="widget-card">
+                <h2>Hızlı Notlar (Kalıcı)</h2>
+                <textarea id="not-alani" placeholder="Buraya önemli notlarınızı yazın. Tarayıcınız kapatılsa bile bu notlar saklanacaktır."></textarea>
+            </div>
+        </div>
+
+        <div id="calendar" class="tab-content">
+            <div class="widget-card">
+                <h2>Takvim</h2>
+                <div class="takvim-baslik">
+                    <button onclick="takvimiDegistir(-1)"> &lt; </button>
+                    <div id="takvim-ay-yil"></div>
+                    <button onclick="takvimiDegistir(1)"> &gt; </button>
+                </div>
+                <div class="takvim-gunler">
+                    <div class="takvim-gun">Pzt</div>
+                    <div class="takvim-gun">Sal</div>
+                    <div class="takvim-gun">Çar</div>
+                    <div class="takvim-gun">Per</div>
+                    <div class="takvim-gun">Cum</div>
+                    <div class="takvim-gun">Cmt</div>
+                    <div class="takvim-gun">Paz</div>
+                </div>
+                <div id="takvim-hucreler" class="takvim-gunler">
+                    </div>
+            </div>
+
+            <div class="widget-card">
+                <h2>Seçilen Günün Görevleri (<span id="secilen-tarih-gostergesi">Bugün</span>)</h2>
+                
+                <div class="gorev-ekle">
+                    <input type="text" id="gorev-metni" placeholder="Görevi buraya yazın..." style="flex: 2;">
+                    <input type="time" id="gorev-alarm-saati" value="09:00" style="width: 100px;">
+                    <button onclick="gorevEkle()">
+                        <span class="material-symbols-outlined">add_task</span> Ekle
+                    </button>
+                </div>
+                
+                <ul id="gorev-listesi">
+                    </ul>
             </div>
         </div>
     </div>
 
-    <button class="mdc-fab" aria-label="Yeni Not Ekle" id="add-note-button">
-      <div class="mdc-fab__ripple"></div>
-      <span class="mdc-fab__icon material-symbols-outlined">add</span>
-    </button>
-    
-    <div class="mdc-dialog" id="note-form-dialog">
-      <div class="mdc-dialog__container">
-        <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true">
-            <form id="note-submit-form">
-                <h2 class="mdc-dialog__title" id="form-dialog-title">Not</h2>
-                <div class="mdc-dialog__content">
-                    
-                    <div class="mdc-text-field mdc-text-field--filled">
-                      <input type="text" id="note-title-input" class="mdc-text-field__input" required>
-                      <span class="mdc-floating-label" for="note-title-input">Başlık</span>
-                      <span class="mdc-line-ripple"></span>
-                    </div>
+    <div class="bottom-nav">
+        <a class="nav-item active" data-tab="home"><span class="material-symbols-outlined">home</span><span>Ana Sayfa</span></a>
+        <a class="nav-item" data-tab="time_management"><span class="material-symbols-outlined">timer</span><span>Zaman Yön.</span></a>
+        <a class="nav-item" data-tab="notes"><span class="material-symbols-outlined">note_alt</span><span>Notlar</span></a>
+        <a class="nav-item" data-tab="calendar"><span class="material-symbols-outlined">calendar_month</span><span>Takvim</span></a>
+    </div>
 
-                    <div class="mdc-select mdc-select--filled" id="project-select-field">
-                        <div class="mdc-select__anchor" role="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="project-select-label project-select-selected-text">
-                          <span class="mdc-select__ripple"></span>
-                          <span id="project-select-label" class="mdc-floating-label">Proje</span>
-                          <span class="mdc-select__selected-text-container">
-                            <span id="project-select-selected-text" class="mdc-select__selected-text">Genel</span>
-                          </span>
-                          <span class="mdc-select__dropdown-icon">
-                            <span class="material-symbols-outlined" style="font-size: 20px;">arrow_drop_down</span>
-                          </span>
-                          <span class="mdc-line-ripple"></span>
-                        </div>
-                        <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
-                          <ul class="mdc-list" role="listbox" id="project-list"></ul>
-                        </div>
-                    </div>
-                    
-                    <div class="mdc-text-field mdc-text-field--textarea mdc-text-field--filled">
-                        <textarea id="note-content-input" class="mdc-text-field__input" rows="4" required></textarea>
-                        <span class="mdc-floating-label" for="note-content-input">İçerik</span>
-                        <span class="mdc-line-ripple"></span>
-                    </div>
+    <audio id="alarm-sesi" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto"></audio>
 
-                    <input type="hidden" id="note-id-input">
-                </div>
-                
-                <div class="mdc-dialog__actions">
-                    <button type="button" class="mdc-button mdc-dialog__button" id="delete-note-button" title="Notu Sil" style="margin-right: auto;">
-                        <span class="mdc-button__ripple"></span>
+    <script>
+        /* JAVASCRIPT FONKSİYONLARI */
+        
+        const alarmSesi = document.getElementById('alarm-sesi');
+        const GOREV_KEY = 'minimal_koyu_gorevler';
+        let gorevler = JSON.parse(localStorage.getItem(GOREV_KEY)) || {};
+        let aktifTarih = new Date(); // Takvim için kullanılan ay/yıl
+        let secilenTarih = new Date(); // Görevler için seçilen gün
+        let alarmKontrolInterval; // Alarm kontrol döngüsü
+
+        // ------------------------------------
+        // GENEL YARDIMCI VE ZAMAN FONKSİYONLARI
+        // ------------------------------------
+
+        function tarihFormatla(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+        
+        function gosterSekme(tabId) {
+            // ... (Önceki koddan)
+            document.querySelectorAll('.tab-content').forEach(content => { content.classList.remove('active'); });
+            document.getElementById(tabId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(item => { item.classList.remove('active'); });
+            document.querySelector(`.nav-item[data-tab="${tabId}"]`).classList.add('active');
+
+            if (tabId !== 'time_management') {
+                pauseStopwatch();
+                pauseTimer();
+            }
+            if (tabId === 'calendar') {
+                // Takvime geçildiğinde günün görevlerini yükle
+                gorevleriYukle(tarihFormatla(secilenTarih));
+                takvimiOlustur(aktifTarih); // Güncel ayın görev işaretlerini yenile
+            }
+        }
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() { gosterSekme(this.getAttribute('data-tab')); });
+        });
+
+        // Alarm Kontrolü Başlat
+        function alarmKontrolBaslat() {
+            if (alarmKontrolInterval) clearInterval(alarmKontrolInterval);
+            alarmKontrolInterval = setInterval(alarmKontrolEt, 5000); // Her 5 saniyede bir kontrol et
+        }
+
+        // Tarayıcı Bildirim İzni Kontrolü
+        function izinIste() {
+            if (!("Notification" in window)) return;
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+        }
+
+        // ------------------------------------
+        // GÖREV, ALARM VE NOT FONKSİYONLARI
+        // ------------------------------------
+        
+        function gorevleriKaydet() {
+            localStorage.setItem(GOREV_KEY, JSON.stringify(gorevler));
+            takvimiOlustur(aktifTarih); // Görev eklenince takvimdeki günü işaretle
+        }
+
+        function gorevleriYukle(tarihStr) {
+            const gorevListesiUL = document.getElementById('gorev-listesi');
+            const gorevlerBugun = gorevler[tarihStr] || [];
+            gorevListesiUL.innerHTML = '';
+            document.getElementById('secilen-tarih-gostergesi').textContent = 
+                tarihStr === tarihFormatla(new Date()) ? "Bugün" : tarihStr;
+
+            if (gorevlerBugun.length === 0) {
+                gorevListesiUL.innerHTML = `<li style="opacity: 0.6; text-align: center;">Bu güne ait görev bulunmamaktadır.</li>`;
+                return;
+            }
+
+            gorevlerBugun.forEach((gorev, index) => {
+                const li = document.createElement('li');
+                li.className = 'gorev-item';
+                li.innerHTML = `
+                    <div class="gorev-detay">
+                        <strong>${gorev.metin}</strong>
+                        <span class="gorev-alarm">
+                            <span class="material-symbols-outlined" style="font-size: 14px;">alarm</span>
+                            Alarm: ${gorev.alarm}
+                        </span>
+                    </div>
+                    <button class="gorev-sil-btn" onclick="gorevSil('${tarihStr}', ${index})">
                         <span class="material-symbols-outlined">delete</span>
                     </button>
-                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close" title="İptal">
-                        <span class="mdc-button__ripple"></span>
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                    <button type="submit" class="mdc-button mdc-dialog__button mdc-button--raised" title="Kaydet">
-                        <span class="mdc-button__ripple"></span>
-                        <span class="material-symbols-outlined">save</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-      </div>
-      <div class="mdc-dialog__scrim"></div>
-    </div>
-
-    <div class="mdc-dialog" id="manage-projects-dialog">
-        <div class="mdc-dialog__container">
-            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true">
-                <h2 class="mdc-dialog__title">Kategorileri Yönet</h2>
-                <div class="mdc-dialog__content">
-                    
-                    <ul class="mdc-list" id="project-management-list" style="max-height: 250px; overflow-y: auto;">
-                        </ul>
-
-                    <form id="add-project-form" style="display: flex; gap: 8px; margin-top: 16px;">
-                        <div class="mdc-text-field mdc-text-field--filled" style="flex-grow: 1;">
-                          <input type="text" id="new-project-input" class="mdc-text-field__input" required>
-                          <span class="mdc-floating-label" for="new-project-input">Yeni Kategori Adı</span>
-                          <span class="mdc-line-ripple"></span>
-                        </div>
-                        <button type="submit" class="mdc-button mdc-button--raised" title="Ekle">
-                            <span class="mdc-button__ripple"></span>
-                            <span class="material-symbols-outlined">add</span>
-                        </button>
-                    </form>
-                </div>
-                <div class="mdc-dialog__actions">
-                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close">
-                        <div class="mdc-button__ripple"></div>
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="mdc-dialog__scrim"></div>
-    </div>
-    
-    <div class="mdc-snackbar mdc-snackbar--leading" aria-live="assertive" aria-atomic="true" aria-hidden="true" id="my-snackbar">
-      <div class="mdc-snackbar__surface" role="status">
-        <div class="mdc-snackbar__label" role="presentation"></div>
-      </div>
-    </div>
-
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-    <script>
-        const MDCSnackbar = mdc.snackbar.MDCSnackbar;
-        const MDCDialog = mdc.dialog.MDCDialog;
-        const MDCSelect = mdc.select.MDCSelect;
-        const MDCTextField = mdc.textField.MDCTextField;
-        const MDCChipSet = mdc.chips.MDCChipSet;
-        
-        // DOM Elementleri
-        const notesContainer = document.getElementById('notes-container');
-        const addButton = document.getElementById('add-note-button');
-        const snackbar = new MDCSnackbar(document.getElementById('my-snackbar'));
-        const projectChipsElement = document.getElementById('project-chips');
-
-        // Modallar ve Formlar
-        const formDialog = new MDCDialog(document.getElementById('note-form-dialog'));
-        const manageProjectsDialog = new MDCDialog(document.getElementById('manage-projects-dialog'));
-        const noteSubmitForm = document.getElementById('note-submit-form');
-        const addProjectForm = document.getElementById('add-project-form');
-        const projectManagementList = document.getElementById('project-management-list');
-        
-        // MDC Bileşenleri
-        const noteTitleInput = new MDCTextField(document.getElementById('note-title-input').closest('.mdc-text-field'));
-        const noteContentInput = new MDCTextField(document.getElementById('note-content-input').closest('.mdc-text-field'));
-        const newProjectInput = new MDCTextField(document.getElementById('new-project-input').closest('.mdc-text-field'));
-        
-        // Diğer Elementler
-        const noteIdInput = document.getElementById('note-id-input');
-        const deleteNoteButton = document.getElementById('delete-note-button');
-        const manageProjectsButton = document.getElementById('manage-projects-button');
-
-        const projectSelectField = document.getElementById('project-select-field');
-        const projectListElement = document.getElementById('project-list');
-        let projectSelect;
-
-        // Sabitler ve Durumlar
-        const NOTES_STORAGE_KEY = 'materialNotesAppModal';
-        const PROJECTS_STORAGE_KEY = 'materialProjectsApp';
-        const DEFAULT_PROJECTS = ['Genel', 'İş', 'Kişisel'];
-        let currentFilter = 'Tüm Projeler';
-        let projectChipSet;
-
-        // --- Veri Fonksiyonları (Düzeltilmiş) ---
-        function getNotes() { return JSON.parse(localStorage.getItem(NOTES_STORAGE_KEY)) || []; }
-        function saveNotes(notes) { localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes)); }
-        function getProjects() { 
-             let projects = JSON.parse(localStorage.getItem(PROJECTS_STORAGE_KEY));
-             if (!projects || projects.length === 0) {
-                projects = DEFAULT_PROJECTS;
-                saveProjects(projects);
-             }
-             return projects;
-        }
-        function saveProjects(projects) { localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects)); }
-        function findNoteById(id) { return getNotes().find(n => n.id === id); }
-        function showSnackbar(message) { snackbar.timeoutMs = 3000; snackbar.data = { message: message }; snackbar.open(); }
-        
-        // --- Render Fonksiyonları ---
-
-        function createProjectListItem(projectName) {
-            // Not Ekleme/Düzenleme Formu için Select içeriği
-            return `<li class="mdc-list-item" role="option" data-value="${projectName}"><span class="mdc-list-item__ripple"></span><span class="mdc-list-item__text">${projectName}</span></li>`;
-        }
-
-        function renderProjectSelects() {
-            const projects = getProjects();
-            // Select içeriğini doldur
-            projectListElement.innerHTML = projects.map(createProjectListItem).join('');
-            
-            // MDC Select bileşenini başlat/yenile
-            if (projectSelect) projectSelect.destroy();
-            projectSelect = new MDCSelect(projectSelectField);
-            
-            // Varsayılan değeri ayarla
-            projectSelect.value = projects.includes('Genel') ? 'Genel' : projects[0];
-        }
-
-        function createProjectChip(name, isSelected) {
-            const selectedClass = isSelected ? 'mdc-chip--selected' : '';
-            return `
-                <div class="mdc-chip ${selectedClass}" role="row" data-value="${name}">
-                    <div class="mdc-chip__ripple"></div>
-                    ${isSelected ? '<span class="mdc-chip__icon mdc-chip__icon--leading material-symbols-outlined">check</span>' : ''}
-                    <span role="gridcell">
-                        <span class="mdc-chip__primary-action">
-                            <span class="mdc-chip__text">${name}</span>
-                        </span>
-                    </span>
-                </div>
-            `;
-        }
-        
-        function renderProjectChips() {
-            const projects = getProjects();
-            
-            // Tüm Projeler çipini en başta ekle
-            let chipsHtml = createProjectChip('Tüm Projeler', currentFilter === 'Tüm Projeler');
-            
-            // Kullanıcı projelerini ekle
-            chipsHtml += projects.map(name => createProjectChip(name, currentFilter === name)).join('');
-            
-            projectChipsElement.innerHTML = chipsHtml;
-            
-            // ChipSet bileşenini başlat ve olay dinleyicisini ekle
-            if (projectChipSet) projectChipSet.destroy();
-            projectChipSet = new MDCChipSet(projectChipsElement);
-            
-            projectChipSet.listen('MDCChip:interaction', (event) => {
-                currentFilter = event.detail.chipId;
-                renderProjectChips(); // Seçili çipin görünümünü güncelle
-                renderNotes(); // Not listesini filtrele
-            });
-        }
-        
-        function createNoteCard(note) {
-            const completedClass = note.completed ? 'note-card--completed' : '';
-            const projectBadge = note.project ? `<span style="font-size: 12px; font-weight: 500; color: #6750A4; margin-bottom: 4px; display: block;">[${note.project}]</span>` : '';
-            
-            return `
-                <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-4">
-                    <div class="mdc-card note-card ${completedClass}" data-id="${note.id}">
-                        <div class="mdc-card__primary-action mdc-card__ripple" style="padding: 16px;">
-                            ${projectBadge}
-                            <div class="demo-card__primary">
-                                <h2 class="demo-card__title mdc-typography mdc-typography--headline6">${note.title}</h2>
-                            </div>
-                            <div class="demo-card__secondary mdc-typography mdc-typography--body2">
-                                ${note.completed 
-                                    ? '<span class="material-symbols-outlined" style="font-size: 20px; margin-right: 4px; vertical-align: middle;">check_circle</span> Tamamlandı' 
-                                    : note.content.substring(0, 100) + '...'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function renderNotes() {
-            const allNotes = getNotes();
-            
-            const notes = allNotes.filter(note => 
-                currentFilter === 'Tüm Projeler' || note.project === currentFilter
-            );
-
-            notesContainer.innerHTML = notes.map(createNoteCard).join('');
-            
-            notesContainer.querySelectorAll('.note-card').forEach(card => {
-                card.addEventListener('click', () => editNote(parseInt(card.getAttribute('data-id'))));
-            });
-
-            mdc.autoInit(notesContainer); 
-        }
-
-        function renderManagementList() {
-            const projects = getProjects();
-            projectManagementList.innerHTML = '';
-
-            projects.forEach(project => {
-                const isDefault = DEFAULT_PROJECTS.includes(project);
-                const li = document.createElement('li');
-                li.className = 'mdc-list-item';
-                li.innerHTML = `
-                    <span class="mdc-list-item__ripple"></span>
-                    <span class="mdc-list-item__text">${project}</span>
-                    <span class="mdc-list-item__meta">
-                        ${isDefault ? 
-                            '' : 
-                            `<button class="mdc-icon-button material-symbols-outlined delete-project-btn" data-project="${project}" title="Sil">delete</button>`
-                        }
-                    </span>
                 `;
-                projectManagementList.appendChild(li);
+                gorevListesiUL.appendChild(li);
             });
+        }
+
+        function gorevEkle() {
+            const metinInput = document.getElementById('gorev-metni');
+            const alarmInput = document.getElementById('gorev-alarm-saati');
+            const metin = metinInput.value.trim();
+            const alarmSaati = alarmInput.value;
+            const tarihStr = tarihFormatla(secilenTarih);
+
+            if (metin === "") {
+                alert("Lütfen bir görev metni girin.");
+                return;
+            }
             
-            // Silme Olay Dinleyicileri
-            projectManagementList.querySelectorAll('.delete-project-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const projectName = e.currentTarget.getAttribute('data-project');
-                    if (confirm(`${projectName} kategorisini silmek istediğinizden emin misiniz? (Bu notları silmez.)`)) {
-                        deleteProject(projectName);
+            // Eğer o gün için görev yoksa boş dizi oluştur
+            if (!gorevler[tarihStr]) {
+                gorevler[tarihStr] = [];
+            }
+
+            gorevler[tarihStr].push({ 
+                metin: metin, 
+                alarm: alarmSaati, 
+                tamamlandi: false,
+                caldi: false
+            });
+
+            metinInput.value = "";
+            gorevleriKaydet();
+            gorevleriYukle(tarihStr);
+        }
+
+        function gorevSil(tarihStr, index) {
+            if (confirm("Bu görevi silmek istediğinizden emin misiniz?")) {
+                if (gorevler[tarihStr]) {
+                    gorevler[tarihStr].splice(index, 1);
+                    if (gorevler[tarihStr].length === 0) {
+                        delete gorevler[tarihStr]; // Boşalan günü sil
+                    }
+                    gorevleriKaydet();
+                    gorevleriYukle(tarihStr);
+                }
+            }
+        }
+        
+        function alarmKontrolEt() {
+            const simdi = new Date();
+            const simdiTarihStr = tarihFormatla(simdi);
+            const simdiSaatStr = `${String(simdi.getHours()).padStart(2, '0')}:${String(simdi.getMinutes()).padStart(2, '0')}`;
+            
+            if (gorevler[simdiTarihStr]) {
+                gorevler[simdiTarihStr].forEach(gorev => {
+                    // Alarm saati geldi mi ve daha önce çalmadı mı?
+                    if (gorev.alarm === simdiSaatStr && !gorev.caldi) {
+                        
+                        // Alarmı çal (Ses ve Bildirim)
+                        alarmCal(gorev.metin); 
+                        
+                        // Alarmı çaldı olarak işaretle
+                        gorev.caldi = true; 
+                        gorevleriKaydet(); 
                     }
                 });
-            });
-            
-            mdc.autoInit(projectManagementList);
-        }
-
-        function deleteProject(projectName) {
-            let projects = getProjects().filter(p => p !== projectName);
-            saveProjects(projects);
-
-            // Silinen kategori filtreleniyorsa, filtreyi 'Tüm Projeler' yap
-            if (currentFilter === projectName) {
-                currentFilter = 'Tüm Projeler';
-            }
-            
-            // Silinen kategoriye sahip notların projesini 'Genel' yap
-            let notes = getNotes();
-            notes = notes.map(note => {
-                if (note.project === projectName) {
-                    note.project = 'Genel';
-                }
-                return note;
-            });
-            saveNotes(notes);
-
-            showSnackbar(`${projectName} kategorisi silindi.`);
-            renderManagementList();
-            renderProjectSelects();
-            renderProjectChips();
-            renderNotes();
-        }
-
-        // --- Olay İşleyicileri ---
-
-        function openNewNoteDialog() {
-            // ... (Yeni not modunda formu temizleme mantığı aynı) ...
-            noteTitleInput.value = '';
-            noteContentInput.value = '';
-            noteIdInput.value = '';
-            projectSelect.value = 'Genel';
-            document.getElementById('form-dialog-title').textContent = 'Yeni Not';
-            deleteNoteButton.style.display = 'none';
-            formDialog.open();
-        }
-
-        function editNote(id) {
-            const note = findNoteById(id);
-            if (note) {
-                noteTitleInput.value = note.title; 
-                noteContentInput.value = note.content; 
-                noteIdInput.value = note.id;
-                projectSelect.value = note.project || 'Genel';
-                document.getElementById('form-dialog-title').textContent = 'Notu Düzenle';
-                deleteNoteButton.style.display = 'inline-flex';
-                formDialog.open();
             }
         }
-        
-        // Not Kaydetme/Güncelleme
-        noteSubmitForm.addEventListener('submit', (event) => {
-            event.preventDefault();
+
+        function alarmCal(gorevMetni) {
+            // Zil Sesini Çal
+            alarmSesi.play().catch(e => console.error("Ses çalınamadı:", e));
             
-            const id = noteIdInput.value ? parseInt(noteIdInput.value) : null;
-            const title = noteTitleInput.value.trim(); 
-            const content = noteContentInput.value.trim(); 
-            const project = projectSelect.value;
-
-            if (title === "" || content === "") {
-                 showSnackbar("Lütfen başlık ve içerik alanlarını doldurun.");
-                 return;
-            }
-
-            let notes = getNotes();
-
-            if (id) {
-                // Düzenleme (Update)
-                const noteIndex = notes.findIndex(n => n.id === id);
-                if (noteIndex !== -1) {
-                    notes[noteIndex] = { ...notes[noteIndex], title, content, project };
-                    showSnackbar("Not güncellendi.");
-                }
+            // Tarayıcı Bildirimi Göster
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("GÖREV ALARMI!", {
+                    body: `Zamanı Geldi: ${gorevMetni}`,
+                    icon: "https://fonts.gstatic.com/s/materialsymbolsoutlined/v164/vSgAU_MofcQo7pOHiLh35QNnJ-Y0p8E_5Gf4x4yO3w.woff2" // Alternatif ikon linki
+                });
             } else {
-                // Yeni Not Ekleme (Create)
-                const newNote = {
-                    id: Date.now(), title: title, content: content, project: project, date: new Date().toISOString(), completed: false
-                };
-                notes.unshift(newNote);
-                showSnackbar("Not kaydedildi.");
+                alert(`Alarm! Görev zamanı geldi: ${gorevMetni}`);
             }
+        }
 
-            saveNotes(notes);
-            renderNotes();
-            formDialog.close();
-        });
-
-        // Yeni Proje Ekleme
-        addProjectForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const newProjectName = newProjectInput.value.trim();
-            
-            if (newProjectName && !getProjects().includes(newProjectName)) {
-                let projects = getProjects();
-                projects.push(newProjectName);
-                saveProjects(projects);
-                newProjectInput.value = '';
-                newProjectInput.foundation.deactivateFocus(); // Odakı kaldır
-                
-                showSnackbar(`${newProjectName} kategorisi eklendi.`);
-                renderManagementList();
-                renderProjectSelects();
-                renderProjectChips();
-            } else if (getProjects().includes(newProjectName)) {
-                showSnackbar("Bu kategori zaten mevcut.");
-            }
-        });
-
-        // Kategori Yönetim Modalını Açma
-        manageProjectsButton.addEventListener('click', () => {
-            renderManagementList();
-            manageProjectsDialog.open();
+        // Kalıcı Notlar (Önceki Koddan)
+        const notAlani = document.getElementById('not-alani');
+        const NOT_KEY = 'minimal_koyu_notlar_v2';
+        notAlani.value = localStorage.getItem(NOT_KEY) || '';
+        notAlani.addEventListener('input', () => {
+            localStorage.setItem(NOT_KEY, notAlani.value);
         });
         
-        // --- Uygulama Başlatma ---
+        // ------------------------------------
+        // TAKVİM FONKSİYONLARI (GÖREV İŞARETLEMELERİ İLE)
+        // ------------------------------------
+        
+        function takvimiOlustur(date) {
+            // ... (Önceki Koddan gerekli değişkenler)
+            const yil = date.getFullYear();
+            const ay = date.getMonth();
+            const bugun = new Date(); 
+            const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+            const ayYilGostergesi = document.getElementById('takvim-ay-yil');
+            const takvimHucreler = document.getElementById('takvim-hucreler');
+            
+            if (!ayYilGostergesi || !takvimHucreler) return; 
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Başlangıç notu ekle
-            const initialNotes = getNotes();
-            if (initialNotes.length === 0) {
-                 const sampleNote = { id: 1, title: "Kategori Baloncukları", content: "Üstteki baloncuklara (Chips) tıklayarak notları filtreleyebilirsiniz. Ayarlar simgesiyle kategori ekleyip silebilirsiniz.", project: "Genel", date: new Date().toISOString(), completed: false };
-                initialNotes.push(sampleNote);
-                saveNotes(initialNotes);
+            ayYilGostergesi.textContent = `${ayIsimleri[ay]} ${yil}`;
+            const ayinIlkGunu = new Date(yil, ay, 1);
+            let baslangicGunu = ayinIlkGunu.getDay();
+            if (baslangicGunu === 0) baslangicGunu = 7; 
+            const gunSayisi = new Date(yil, ay + 1, 0).getDate();
+            takvimHucreler.innerHTML = ''; 
+
+            for (let i = 1; i < baslangicGunu; i++) {
+                const hucre = document.createElement('div');
+                hucre.classList.add('takvim-hucre', 'bos');
+                takvimHucreler.appendChild(hucre);
             }
-            
-            // Bileşenleri başlat
-            mdc.autoInit();
-            renderProjectSelects(); // Formdaki select için
-            renderProjectChips(); // Filtre baloncukları için
-            renderNotes();
-            
-            addButton.addEventListener('click', openNewNoteDialog);
-        });
+
+            for (let i = 1; i <= gunSayisi; i++) {
+                const hucre = document.createElement('div');
+                hucre.classList.add('takvim-hucre', 'dolu');
+                hucre.textContent = i;
+
+                const oAnkiGun = new Date(yil, ay, i);
+                const tarihStr = tarihFormatla(oAnkiGun);
+
+                // Bugünün Tarihini İşaretle
+                if (oAnkiGun.toDateString() === bugun.toDateString()) {
+                    hucre.classList.add('bugun');
+                }
+                
+                // Seçilen Tarihi İşaretle
+                if (oAnkiGun.toDateString() === secilenTarih.toDateString()) {
+                     hucre.style.outline = `3px solid ${i === bugun.getDate() && ay === bugun.getMonth() ? 'white' : 'yellow'}`;
+                }
+
+                // Görev Olan Günleri İşaretle
+                if (gorevler[tarihStr] && gorevler[tarihStr].length > 0) {
+                    hucre.classList.add('gorevli');
+                }
+                
+                // Tıklama Olayı: Günü seç ve görevleri yükle
+                hucre.onclick = () => {
+                    secilenTarih = oAnkiGun;
+                    gorevleriYukle(tarihStr);
+                    takvimiOlustur(aktifTarih); // Seçim rengini yenile
+                };
+
+                takvimHucreler.appendChild(hucre);
+            }
+        }
+
+        function takvimiDegistir(delta) {
+            aktifTarih.setMonth(aktifTarih.getMonth() + delta);
+            takvimiOlustur(aktifTarih);
+        }
+
+        // ------------------------------------
+        // KRONOMETRE ve ZAMANLAYICI FONKSİYONLARI (Önceki koddan alınmıştır)
+        // ------------------------------------
+        let swInterval; let swRunning = false; let swElapsedTime = 0;
+        const swDisplay = document.getElementById('stopwatch-display');
+        const swStartBtn = document.getElementById('sw-start-btn');
+        const swPauseBtn = document.getElementById('sw-pause-btn');
+        
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+        function formatSeconds(totalSeconds) { return formatTime(totalSeconds * 1000); }
+        function startStopwatch() { if (swRunning) return; swRunning = true; const swStartTime = Date.now() - swElapsedTime; swInterval = setInterval(() => { swElapsedTime = Date.now() - swStartTime; swDisplay.textContent = formatTime(swElapsedTime); }, 1000); swStartBtn.style.display = 'none'; swPauseBtn.style.display = 'inline-flex'; }
+        function pauseStopwatch() { if (!swRunning) return; swRunning = false; clearInterval(swInterval); swStartBtn.style.display = 'inline-flex'; swPauseBtn.style.display = 'none'; }
+        function resetStopwatch() { pauseStopwatch(); swElapsedTime = 0; swDisplay.textContent = formatTime(swElapsedTime); }
+        
+        let timerInterval; let timerRunning = false; let remainingSeconds = 300; let initialSeconds = 300;
+        const timerDisplay = document.getElementById('timer-display');
+        const timerStartBtn = document.getElementById('timer-start-btn');
+        const timerPauseBtn = document.getElementById('timer-pause-btn');
+        const hInput = document.getElementById('timer-hours');
+        const mInput = document.getElementById('timer-minutes');
+        const sInput = document.getElementById('timer-seconds');
+        
+        function updateRemainingTime() {
+            if (remainingSeconds <= 0) {
+                clearInterval(timerInterval); timerRunning = false; timerDisplay.textContent = "00:00:00"; 
+                alarmCal("Zamanlayıcı Geri Sayımı Sona Erdi!");
+                timerStartBtn.style.display = 'inline-flex'; timerPauseBtn.style.display = 'none';
+                return;
+            }
+            timerDisplay.textContent = formatSeconds(remainingSeconds);
+            remainingSeconds--;
+        }
+        function setInitialTime() {
+            const hours = parseInt(hInput.value) || 0; const minutes = parseInt(mInput.value) || 0; const seconds = parseInt(sInput.value) || 0;
+            const newTotalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+            if (newTotalSeconds > 0) { initialSeconds = newTotalSeconds; remainingSeconds = newTotalSeconds; } 
+            else { initialSeconds = 300; remainingSeconds = 300; }
+            timerDisplay.textContent = formatSeconds(remainingSeconds);
+            timerStartBtn.style.display = 'inline-flex'; timerPauseBtn.style.display = 'none';
+        }
+        [hInput, mInput, sInput].forEach(input => { input.addEventListener('input', () => { pauseTimer(); setInitialTime(); }); });
+        function startTimer() { if (timerRunning) return; if (remainingSeconds <= 0) { setInitialTime(); if (remainingSeconds <= 0) return; } timerRunning = true; timerInterval = setInterval(updateRemainingTime, 1000); timerStartBtn.style.display = 'none'; timerPauseBtn.style.display = 'inline-flex'; }
+        function pauseTimer() { if (!timerRunning) return; timerRunning = false; clearInterval(timerInterval); timerStartBtn.style.display = 'inline-flex'; timerPauseBtn.style.display = 'none'; }
+        function resetTimer() { pauseTimer(); remainingSeconds = initialSeconds; timerDisplay.textContent = formatSeconds(remainingSeconds); hInput.value = Math.floor(initialSeconds / 3600); mInput.value = Math.floor((initialSeconds % 3600) / 60); sInput.value = initialSeconds % 60; }
+        setInitialTime();
+
+        // ------------------------------------
+        // İLK BAŞLATMA İŞLEMLERİ
+        // ------------------------------------
+        saatiGuncelle();
+        takvimiOlustur(aktifTarih); 
+        gorevleriYukle(tarihFormatla(secilenTarih)); 
+        izinIste(); // Bildirim izni iste
+        alarmKontrolBaslat(); // Alarm kontrolünü başlat
     </script>
 </body>
 </html>

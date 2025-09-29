@@ -3,102 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimal Görev Yönetim Panosu</title>
+    <title>Tam Özelleştirilebilir Yönetim Panosu</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
-        /* CSS STİLLERİ (Öncekine Eklemeler ve İyileştirmeler) */
+        /* CSS STİLLERİ */
         :root {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
+            /* Varsayılan tema renkleri (JS tarafından üzerine yazılır) */
+            --bg-color: #121212; 
+            --text-color: #e0e0e0; 
             --primary-color: #bb86fc; 
             --secondary-color: #03dac6; 
             --card-bg: #1e1e1e;
             --border-color: #333333;
-            --error-color: #cf6679; /* Kırmızımsı hata/silme rengi */
+            --error-color: #cf6679;
         }
         
-        /* Genel Stil ve Navigasyon (Kısaltıldı) */
-        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; padding-bottom: 70px; }
+        /* Tema Ayarları Yükleyici JS Bloğu */
+        /* Sayfa yüklenmeden önce renkleri ayarlar. */
+        (function () {
+            const savedTheme = localStorage.getItem('custom_theme_settings');
+            if (savedTheme) {
+                const settings = JSON.parse(savedTheme);
+                const root = document.documentElement;
+                root.style.setProperty('--bg-color', settings.bgColor);
+                root.style.setProperty('--text-color', settings.textColor);
+                root.style.setProperty('--primary-color', settings.primaryColor);
+                root.style.setProperty('--secondary-color', settings.secondaryColor);
+                root.style.setProperty('--card-bg', settings.cardBg);
+            }
+        })();
+        
+        /* Genel Stiller ve Geçişler */
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; padding-bottom: 70px; transition: background-color 0.5s; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 }
         .board-content { padding: 20px; max-width: 1000px; margin: 0 auto; }
         .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; min-height: 80vh; }
         .tab-content.active { display: block; }
-        .widget-card { background-color: var(--card-bg); padding: 25px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); }
-        h2 { color: var(--primary-color); margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; font-weight: 500; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background-color: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5); z-index: 1000; }
-        .nav-item { color: var(--text-color); text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; cursor: pointer; transition: color 0.2s; font-size: 0.75rem; font-weight: 500; gap: 2px; opacity: 0.6; }
-        .nav-item.active, .nav-item:hover { color: var(--primary-color); opacity: 1; }
+        .widget-card { background-color: var(--card-bg); padding: 25px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transition: background-color 0.5s; }
+        h2 { color: var(--primary-color); margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; font-weight: 500; transition: color 0.5s, border-bottom 0.5s; }
+
+        /* Navigasyon Stilleri */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background-color: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5); z-index: 1000; transition: background-color 0.5s; }
+        .nav-item { color: var(--text-color); text-decoration: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.6; font-size: 0.75rem; font-weight: 500; gap: 2px; }
+        .nav-item.active, .nav-item:hover { color: var(--primary-color); opacity: 1; transition: color 0.3s; }
         .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
-
-        /* Takvim ve Görev Yönetimi Stilleri */
-        .takvim-baslik, .gorev-ekle { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .takvim-baslik button { background-color: var(--secondary-color); color: var(--bg-color); border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
-        .takvim-gunler { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .takvim-hucre { padding: 10px 0; border-radius: 8px; cursor: pointer; transition: background-color 0.2s, color 0.2s; font-size: 0.9rem; position: relative; }
-        .takvim-hucre.dolu:hover { background-color: var(--secondary-color); color: var(--bg-color); }
-        .takvim-hucre.bugun { background-color: var(--primary-color); color: var(--bg-color); font-weight: bold; }
         
-        .gorevli { 
-            border: 2px solid var(--error-color); 
-            box-shadow: 0 0 5px var(--error-color);
-        }
+        /* Zaman ve Ekran Stilleri */
+        .display-large { font-size: 2.5rem; text-align: center; color: var(--secondary-color); margin-bottom: 15px; transition: color 0.5s; }
+        .timer-controls button, .gorev-ekle button { background-color: var(--primary-color); color: var(--bg-color); border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; display: inline-flex; align-items: center; gap: 5px; font-weight: 500;}
+        .timer-controls { display: flex; justify-content: space-around; gap: 10px; }
+        .countdown-setup input { width: 40px; text-align: center; padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); }
 
-        /* Görev Listesi Stili */
-        #gorev-listesi { margin-top: 20px; padding: 0; list-style: none; }
-        .gorev-item {
-            background-color: var(--bg-color);
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid var(--secondary-color);
-        }
-
-        .gorev-sil-btn {
-            background: none;
-            border: none;
-            color: var(--error-color);
-            cursor: pointer;
-            padding: 5px;
-            margin-left: 10px;
-        }
-
-        .gorev-detay {
-            flex-grow: 1;
-        }
-
-        .gorev-detay strong {
-            display: block;
-            font-size: 1.1em;
-        }
-
-        .gorev-alarm {
-            font-size: 0.8em;
-            color: var(--primary-color);
-        }
-
-        /* Görev Ekleme Formu Stili */
-        .gorev-ekle input, .gorev-ekle button {
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-        .gorev-ekle button {
-            background-color: var(--primary-color);
-            color: var(--bg-color);
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* Zil Sesi için gizli Audio elemanı */
-        #alarm-sesi { display: none; }
+        /* Takvim ve Görev Stilleri */
+        .takvim-baslik { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .takvim-gunler { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .takvim-hucre { padding: 10px 0; border-radius: 8px; cursor: pointer; position: relative; }
+        .takvim-hucre.bugun { background-color: var(--primary-color); color: var(--bg-color); font-weight: bold; }
+        .gorevli { border: 2px solid var(--error-color); box-shadow: 0 0 5px var(--error-color); }
+        .gorev-item { border-left: 5px solid var(--secondary-color); background-color: var(--bg-color); padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .gorev-ekle { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
+        .gorev-ekle input, #not-alani { padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); }
+        #not-alani { width: 100%; height: 200px; box-sizing: border-box; resize: vertical; font-size: 1rem; }
+        
+        /* Ayarlar Stilleri */
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+        .setting-item { display: flex; flex-direction: column; gap: 10px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; }
+        .setting-item label { font-weight: 500; color: var(--primary-color); }
+        .setting-item input[type="color"] { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: none; border: none; width: 100%; height: 50px; padding: 0; cursor: pointer; border-radius: 6px; }
+        .setting-item button { margin-top: auto; }
     </style>
 </head>
 <body>
@@ -108,8 +80,8 @@
         <div id="home" class="tab-content active">
             <div class="widget-card">
                 <h2>Anlık Saat ve Tarih</h2>
-                <div id="saat-gostergesi" class="display-large"></div>
-                <div id="tarih-gostergesi"></div>
+                <div id="saat-gostergesi" class="display-large" style="font-size: 3.5rem;"></div>
+                <div id="tarih-gostergesi" style="text-align: center;"></div>
             </div>
         </div>
 
@@ -118,32 +90,25 @@
                 <h2>Kronometre (Stopwatch)</h2>
                 <div id="stopwatch-display" class="display-large">00:00:00</div>
                 <div class="timer-controls">
-                    <button id="sw-start-btn" onclick="startStopwatch()"><span class="material-symbols-outlined">play_arrow</span> Başlat</button>
-                    <button id="sw-pause-btn" onclick="pauseStopwatch()" style="display:none;"><span class="material-symbols-outlined">pause</span> Duraklat</button>
+                    <button id="sw-start-btn" onclick="startStopwatch()"><span class="material-symbols-outlined">play_circle</span> Başlat</button>
+                    <button id="sw-pause-btn" onclick="pauseStopwatch()" style="display:none;"><span class="material-symbols-outlined">pause_circle</span> Duraklat</button>
                     <button onclick="resetStopwatch()"><span class="material-symbols-outlined">restart_alt</span> Sıfırla</button>
                 </div>
             </div>
 
             <div class="widget-card">
                 <h2>Geri Sayım Zamanlayıcısı (Timer)</h2>
-                <div class="countdown-setup">
+                <div style="text-align: center; margin-bottom: 10px;">
                     <input type="number" id="timer-hours" value="0" min="0" max="23"> <label>saat</label>
                     <input type="number" id="timer-minutes" value="5" min="0" max="59"> <label>dakika</label>
                     <input type="number" id="timer-seconds" value="0" min="0" max="59"> <label>saniye</label>
                 </div>
                 <div id="timer-display" class="display-large">00:05:00</div>
                 <div class="timer-controls">
-                    <button id="timer-start-btn" onclick="startTimer()"><span class="material-symbols-outlined">play_arrow</span> Başlat</button>
-                    <button id="timer-pause-btn" onclick="pauseTimer()" style="display:none;"><span class="material-symbols-outlined">pause</span> Duraklat</button>
+                    <button id="timer-start-btn" onclick="startTimer()"><span class="material-symbols-outlined">schedule</span> Başlat</button>
+                    <button id="timer-pause-btn" onclick="pauseTimer()" style="display:none;"><span class="material-symbols-outlined">pause_circle</span> Duraklat</button>
                     <button onclick="resetTimer()"><span class="material-symbols-outlined">restart_alt</span> Sıfırla</button>
                 </div>
-            </div>
-        </div>
-
-        <div id="notes" class="tab-content">
-            <div class="widget-card">
-                <h2>Hızlı Notlar (Kalıcı)</h2>
-                <textarea id="not-alani" placeholder="Buraya önemli notlarınızı yazın. Tarayıcınız kapatılsa bile bu notlar saklanacaktır."></textarea>
             </div>
         </div>
 
@@ -170,7 +135,6 @@
 
             <div class="widget-card">
                 <h2>Seçilen Günün Görevleri (<span id="secilen-tarih-gostergesi">Bugün</span>)</h2>
-                
                 <div class="gorev-ekle">
                     <input type="text" id="gorev-metni" placeholder="Görevi buraya yazın..." style="flex: 2;">
                     <input type="time" id="gorev-alarm-saati" value="09:00" style="width: 100px;">
@@ -178,9 +142,46 @@
                         <span class="material-symbols-outlined">add_task</span> Ekle
                     </button>
                 </div>
-                
-                <ul id="gorev-listesi">
+                <ul id="gorev-listesi" style="padding: 0; list-style: none;">
                     </ul>
+            </div>
+
+            <div class="widget-card">
+                <h2>Hızlı Notlar (Kalıcı)</h2>
+                <textarea id="not-alani" placeholder="Buraya genel notlarınızı yazın. Tarayıcınız kapatılsa bile bu notlar saklanacaktır."></textarea>
+            </div>
+        </div>
+
+        <div id="settings" class="tab-content">
+            <div class="widget-card">
+                <h2>Tema ve Stil Ayarları</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="bg-color">Arka Plan Rengi</label>
+                        <input type="color" id="bg-color" data-css-var="--bg-color" oninput="temayiGuncelle(this.id, this.value)">
+                    </div>
+                    <div class="setting-item">
+                        <label for="card-bg">Kart Arka Plan Rengi</label>
+                        <input type="color" id="card-bg" data-css-var="--card-bg" oninput="temayiGuncelle(this.id, this.value)">
+                    </div>
+                    <div class="setting-item">
+                        <label for="primary-color">Ana Aksan Rengi</label>
+                        <input type="color" id="primary-color" data-css-var="--primary-color" oninput="temayiGuncelle(this.id, this.value)">
+                    </div>
+                    <div class="setting-item">
+                        <label for="secondary-color">İkincil Aksan Rengi</label>
+                        <input type="color" id="secondary-color" data-css-var="--secondary-color" oninput="temayiGuncelle(this.id, this.value)">
+                    </div>
+                    <div class="setting-item">
+                        <label for="text-color">Metin Rengi</label>
+                        <input type="color" id="text-color" data-css-var="--text-color" oninput="temayiGuncelle(this.id, this.value)">
+                    </div>
+                    <div class="setting-item">
+                        <button onclick="temayiSifirla()" style="background-color: var(--error-color);">
+                            <span class="material-symbols-outlined">settings_backup_restore</span> Varsayılana Sıfırla
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -188,321 +189,161 @@
     <div class="bottom-nav">
         <a class="nav-item active" data-tab="home"><span class="material-symbols-outlined">home</span><span>Ana Sayfa</span></a>
         <a class="nav-item" data-tab="time_management"><span class="material-symbols-outlined">timer</span><span>Zaman Yön.</span></a>
-        <a class="nav-item" data-tab="notes"><span class="material-symbols-outlined">note_alt</span><span>Notlar</span></a>
-        <a class="nav-item" data-tab="calendar"><span class="material-symbols-outlined">calendar_month</span><span>Takvim</span></a>
+        <a class="nav-item" data-tab="calendar"><span class="material-symbols-outlined">edit_calendar</span><span>Takvim/Not</span></a>
+        <a class="nav-item" data-tab="settings"><span class="material-symbols-outlined">palette</span><span>Ayarlar</span></a>
     </div>
 
-    <audio id="alarm-sesi" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto"></audio>
+    <audio id="alarm-sesi" src="https://cdn.pixabay.com/download/audio/2023/06/17/audio_22822a16d8.mp3?filename=notification-sound-129285.mp3" preload="auto"></audio>
 
     <script>
-        /* JAVASCRIPT FONKSİYONLARI */
-        
-        const alarmSesi = document.getElementById('alarm-sesi');
+        // **************** TEMEL DEĞİŞKENLER VE AYARLAR ****************
         const GOREV_KEY = 'minimal_koyu_gorevler';
-        let gorevler = JSON.parse(localStorage.getItem(GOREV_KEY)) || {};
-        let aktifTarih = new Date(); // Takvim için kullanılan ay/yıl
-        let secilenTarih = new Date(); // Görevler için seçilen gün
-        let alarmKontrolInterval; // Alarm kontrol döngüsü
-
-        // ------------------------------------
-        // GENEL YARDIMCI VE ZAMAN FONKSİYONLARI
-        // ------------------------------------
-
-        function tarihFormatla(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
+        const NOT_KEY = 'minimal_koyu_notlar_v2';
+        const THEME_KEY = 'custom_theme_settings';
+        const DEFAULT_THEME = { bgColor: '#121212', textColor: '#e0e0e0', primaryColor: '#bb86fc', secondaryColor: '#03dac6', cardBg: '#1e1e1e', };
         
-        function gosterSekme(tabId) {
-            // ... (Önceki koddan)
+        let gorevler = JSON.parse(localStorage.getItem(GOREV_KEY)) || {};
+        let aktifTarih = new Date(); 
+        let secilenTarih = new Date(); 
+        let alarmKontrolInterval;
+        const alarmSesi = document.getElementById('alarm-sesi');
+
+        // **************** YARDIMCI FONKSİYONLAR ****************
+        function tarihFormatla(date) { const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; }
+        function formatTime(ms) { const totalSeconds = Math.floor(ms / 1000); const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0'); const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0'); const seconds = String(totalSeconds % 60).padStart(2, '0'); return `${hours}:${minutes}:${seconds}`; }
+        function formatSeconds(totalSeconds) { return formatTime(totalSeconds * 1000); }
+
+        // **************** TEMA YÖNETİMİ ****************
+        function temayiYukle() {
+            const saved = JSON.parse(localStorage.getItem(THEME_KEY)) || DEFAULT_THEME;
+            const root = document.documentElement;
+            root.style.setProperty('--bg-color', saved.bgColor);
+            root.style.setProperty('--text-color', saved.textColor);
+            root.style.setProperty('--primary-color', saved.primaryColor);
+            root.style.setProperty('--secondary-color', saved.secondaryColor);
+            root.style.setProperty('--card-bg', saved.cardBg);
+
+            if (document.getElementById('bg-color')) {
+                document.getElementById('bg-color').value = saved.bgColor;
+                document.getElementById('text-color').value = saved.textColor;
+                document.getElementById('primary-color').value = saved.primaryColor;
+                document.getElementById('secondary-color').value = saved.secondaryColor;
+                document.getElementById('card-bg').value = saved.cardBg;
+            }
+        }
+        function temayiGuncelle(elementId, value) {
+            const root = document.documentElement;
+            const cssVar = document.getElementById(elementId).getAttribute('data-css-var');
+            root.style.setProperty(cssVar, value);
+
+            const current = JSON.parse(localStorage.getItem(THEME_KEY)) || DEFAULT_THEME;
+            const keyMap = { 'bg-color': 'bgColor', 'text-color': 'textColor', 'primary-color': 'primaryColor', 'secondary-color': 'secondaryColor', 'card-bg': 'cardBg' };
+            if (keyMap[elementId]) {
+                 current[keyMap[elementId]] = value;
+                 localStorage.setItem(THEME_KEY, JSON.stringify(current));
+            }
+        }
+        function temayiSifirla() { localStorage.removeItem(THEME_KEY); temayiYukle(); alert("Tema varsayılan Material Dark stiline sıfırlandı."); }
+        window.addEventListener('load', temayiYukle);
+
+        // **************** SEKMELER VE GENEL KONTROL ****************
+        function gosterSekme(tabId) { 
             document.querySelectorAll('.tab-content').forEach(content => { content.classList.remove('active'); });
             document.getElementById(tabId).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(item => { item.classList.remove('active'); });
             document.querySelector(`.nav-item[data-tab="${tabId}"]`).classList.add('active');
 
-            if (tabId !== 'time_management') {
-                pauseStopwatch();
-                pauseTimer();
-            }
-            if (tabId === 'calendar') {
-                // Takvime geçildiğinde günün görevlerini yükle
-                gorevleriYukle(tarihFormatla(secilenTarih));
-                takvimiOlustur(aktifTarih); // Güncel ayın görev işaretlerini yenile
-            }
+            if (tabId !== 'time_management') { pauseStopwatch(); pauseTimer(); }
+            if (tabId === 'calendar') { gorevleriYukle(tarihFormatla(secilenTarih)); takvimiOlustur(aktifTarih); }
         }
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() { gosterSekme(this.getAttribute('data-tab')); });
-        });
+        document.querySelectorAll('.nav-item').forEach(item => { item.addEventListener('click', function() { gosterSekme(this.getAttribute('data-tab')); }); });
 
-        // Alarm Kontrolü Başlat
-        function alarmKontrolBaslat() {
-            if (alarmKontrolInterval) clearInterval(alarmKontrolInterval);
-            alarmKontrolInterval = setInterval(alarmKontrolEt, 5000); // Her 5 saniyede bir kontrol et
-        }
-
-        // Tarayıcı Bildirim İzni Kontrolü
-        function izinIste() {
-            if (!("Notification" in window)) return;
-            if (Notification.permission !== "granted") {
-                Notification.requestPermission();
+        // **************** SAAT VE TARİH ****************
+        function saatiGuncelle() {
+            const now = new Date();
+            const saatGostergesi = document.getElementById('saat-gostergesi');
+            const tarihGostergesi = document.getElementById('tarih-gostergesi');
+            if (saatGostergesi && tarihGostergesi) {
+                const saat = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const tarih = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                saatGostergesi.textContent = saat;
+                tarihGostergesi.textContent = tarih;
             }
         }
+        setInterval(saatiGuncelle, 1000);
 
-        // ------------------------------------
-        // GÖREV, ALARM VE NOT FONKSİYONLARI
-        // ------------------------------------
-        
-        function gorevleriKaydet() {
-            localStorage.setItem(GOREV_KEY, JSON.stringify(gorevler));
-            takvimiOlustur(aktifTarih); // Görev eklenince takvimdeki günü işaretle
-        }
+        // **************** NOTLAR ****************
+        const notAlani = document.getElementById('not-alani');
+        notAlani.value = localStorage.getItem(NOT_KEY) || '';
+        notAlani.addEventListener('input', () => { localStorage.setItem(NOT_KEY, notAlani.value); });
 
-        function gorevleriYukle(tarihStr) {
+        // **************** GÖREVLER, TAKVİM VE ALARM ****************
+        function izinIste() { if (!("Notification" in window)) return; if (Notification.permission !== "granted") { Notification.requestPermission(); } }
+        function alarmCal(gorevMetni) { alarmSesi.play().catch(e => console.error("Ses çalınamadı:", e)); if ("Notification" in window && Notification.permission === "granted") { new Notification("GÖREV ALARMI!", { body: `Zamanı Geldi: ${gorevMetni}`, icon: "https://fonts.gstatic.com/s/materialsymbolsoutlined/v164/vSgAU_MofcQo7pOHiLh35QNnJ-Y0p8E_5Gf4x4yO3w.woff2" }); } else { alert(`Alarm! Görev zamanı geldi: ${gorevMetni}`); } }
+        function alarmKontrolEt() { const simdi = new Date(); const simdiTarihStr = tarihFormatla(simdi); const simdiSaatStr = `${String(simdi.getHours()).padStart(2, '0')}:${String(simdi.getMinutes()).padStart(2, '0')}`; if (gorevler[simdiTarihStr]) { gorevler[simdiTarihStr].forEach(gorev => { if (gorev.alarm === simdiSaatStr && !gorev.caldi) { alarmCal(gorev.metin); gorev.caldi = true; gorevleriKaydet(); } }); } }
+        function alarmKontrolBaslat() { if (alarmKontrolInterval) clearInterval(alarmKontrolInterval); alarmKontrolInterval = setInterval(alarmKontrolEt, 5000); }
+        function gorevleriKaydet() { localStorage.setItem(GOREV_KEY, JSON.stringify(gorevler)); takvimiOlustur(aktifTarih); }
+        function gorevleriYukle(tarihStr) { 
             const gorevListesiUL = document.getElementById('gorev-listesi');
             const gorevlerBugun = gorevler[tarihStr] || [];
             gorevListesiUL.innerHTML = '';
-            document.getElementById('secilen-tarih-gostergesi').textContent = 
-                tarihStr === tarihFormatla(new Date()) ? "Bugün" : tarihStr;
-
-            if (gorevlerBugun.length === 0) {
-                gorevListesiUL.innerHTML = `<li style="opacity: 0.6; text-align: center;">Bu güne ait görev bulunmamaktadır.</li>`;
-                return;
-            }
-
+            document.getElementById('secilen-tarih-gostergesi').textContent = tarihStr === tarihFormatla(new Date()) ? "Bugün" : tarihStr;
+            if (gorevlerBugun.length === 0) { gorevListesiUL.innerHTML = `<li style="opacity: 0.6; text-align: center;">Bu güne ait görev bulunmamaktadır.</li>`; return; }
             gorevlerBugun.forEach((gorev, index) => {
                 const li = document.createElement('li');
                 li.className = 'gorev-item';
-                li.innerHTML = `
-                    <div class="gorev-detay">
-                        <strong>${gorev.metin}</strong>
-                        <span class="gorev-alarm">
-                            <span class="material-symbols-outlined" style="font-size: 14px;">alarm</span>
-                            Alarm: ${gorev.alarm}
-                        </span>
-                    </div>
-                    <button class="gorev-sil-btn" onclick="gorevSil('${tarihStr}', ${index})">
-                        <span class="material-symbols-outlined">delete</span>
-                    </button>
-                `;
+                li.innerHTML = `<div class="gorev-detay"><strong>${gorev.metin}</strong><span class="gorev-alarm"><span class="material-symbols-outlined" style="font-size: 14px;">alarm</span> Alarm: ${gorev.alarm}</span></div><button class="gorev-sil-btn" onclick="gorevSil('${tarihStr}', ${index})"><span class="material-symbols-outlined">delete</span></button>`;
                 gorevListesiUL.appendChild(li);
             });
-        }
-
+         }
         function gorevEkle() {
-            const metinInput = document.getElementById('gorev-metni');
-            const alarmInput = document.getElementById('gorev-alarm-saati');
-            const metin = metinInput.value.trim();
-            const alarmSaati = alarmInput.value;
-            const tarihStr = tarihFormatla(secilenTarih);
-
-            if (metin === "") {
-                alert("Lütfen bir görev metni girin.");
-                return;
-            }
-            
-            // Eğer o gün için görev yoksa boş dizi oluştur
-            if (!gorevler[tarihStr]) {
-                gorevler[tarihStr] = [];
-            }
-
-            gorevler[tarihStr].push({ 
-                metin: metin, 
-                alarm: alarmSaati, 
-                tamamlandi: false,
-                caldi: false
-            });
-
-            metinInput.value = "";
-            gorevleriKaydet();
-            gorevleriYukle(tarihStr);
+            const metinInput = document.getElementById('gorev-metni'); const alarmInput = document.getElementById('gorev-alarm-saati'); const metin = metinInput.value.trim(); const alarmSaati = alarmInput.value; const tarihStr = tarihFormatla(secilenTarih);
+            if (metin === "") { alert("Lütfen bir görev metni girin."); return; }
+            if (!gorevler[tarihStr]) { gorevler[tarihStr] = []; }
+            gorevler[tarihStr].push({ metin: metin, alarm: alarmSaati, tamamlandi: false, caldi: false });
+            metinInput.value = ""; gorevleriKaydet(); gorevleriYukle(tarihStr);
         }
-
-        function gorevSil(tarihStr, index) {
-            if (confirm("Bu görevi silmek istediğinizden emin misiniz?")) {
-                if (gorevler[tarihStr]) {
-                    gorevler[tarihStr].splice(index, 1);
-                    if (gorevler[tarihStr].length === 0) {
-                        delete gorevler[tarihStr]; // Boşalan günü sil
-                    }
-                    gorevleriKaydet();
-                    gorevleriYukle(tarihStr);
-                }
-            }
-        }
-        
-        function alarmKontrolEt() {
-            const simdi = new Date();
-            const simdiTarihStr = tarihFormatla(simdi);
-            const simdiSaatStr = `${String(simdi.getHours()).padStart(2, '0')}:${String(simdi.getMinutes()).padStart(2, '0')}`;
-            
-            if (gorevler[simdiTarihStr]) {
-                gorevler[simdiTarihStr].forEach(gorev => {
-                    // Alarm saati geldi mi ve daha önce çalmadı mı?
-                    if (gorev.alarm === simdiSaatStr && !gorev.caldi) {
-                        
-                        // Alarmı çal (Ses ve Bildirim)
-                        alarmCal(gorev.metin); 
-                        
-                        // Alarmı çaldı olarak işaretle
-                        gorev.caldi = true; 
-                        gorevleriKaydet(); 
-                    }
-                });
-            }
-        }
-
-        function alarmCal(gorevMetni) {
-            // Zil Sesini Çal
-            alarmSesi.play().catch(e => console.error("Ses çalınamadı:", e));
-            
-            // Tarayıcı Bildirimi Göster
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("GÖREV ALARMI!", {
-                    body: `Zamanı Geldi: ${gorevMetni}`,
-                    icon: "https://fonts.gstatic.com/s/materialsymbolsoutlined/v164/vSgAU_MofcQo7pOHiLh35QNnJ-Y0p8E_5Gf4x4yO3w.woff2" // Alternatif ikon linki
-                });
-            } else {
-                alert(`Alarm! Görev zamanı geldi: ${gorevMetni}`);
-            }
-        }
-
-        // Kalıcı Notlar (Önceki Koddan)
-        const notAlani = document.getElementById('not-alani');
-        const NOT_KEY = 'minimal_koyu_notlar_v2';
-        notAlani.value = localStorage.getItem(NOT_KEY) || '';
-        notAlani.addEventListener('input', () => {
-            localStorage.setItem(NOT_KEY, notAlani.value);
-        });
-        
-        // ------------------------------------
-        // TAKVİM FONKSİYONLARI (GÖREV İŞARETLEMELERİ İLE)
-        // ------------------------------------
-        
-        function takvimiOlustur(date) {
-            // ... (Önceki Koddan gerekli değişkenler)
-            const yil = date.getFullYear();
-            const ay = date.getMonth();
-            const bugun = new Date(); 
-            const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-            const ayYilGostergesi = document.getElementById('takvim-ay-yil');
-            const takvimHucreler = document.getElementById('takvim-hucreler');
-            
+        function gorevSil(tarihStr, index) { if (confirm("Bu görevi silmek istediğinizden emin misiniz?")) { if (gorevler[tarihStr]) { gorevler[tarihStr].splice(index, 1); if (gorevler[tarihStr].length === 0) { delete gorevler[tarihStr]; } gorevleriKaydet(); gorevleriYukle(tarihStr); } } }
+        function takvimiOlustur(date) { 
+            const yil = date.getFullYear(); const ay = date.getMonth(); const bugun = new Date(); const ayIsimleri = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+            const ayYilGostergesi = document.getElementById('takvim-ay-yil'); const takvimHucreler = document.getElementById('takvim-hucreler');
             if (!ayYilGostergesi || !takvimHucreler) return; 
-
             ayYilGostergesi.textContent = `${ayIsimleri[ay]} ${yil}`;
-            const ayinIlkGunu = new Date(yil, ay, 1);
-            let baslangicGunu = ayinIlkGunu.getDay();
-            if (baslangicGunu === 0) baslangicGunu = 7; 
-            const gunSayisi = new Date(yil, ay + 1, 0).getDate();
-            takvimHucreler.innerHTML = ''; 
-
-            for (let i = 1; i < baslangicGunu; i++) {
-                const hucre = document.createElement('div');
-                hucre.classList.add('takvim-hucre', 'bos');
-                takvimHucreler.appendChild(hucre);
-            }
-
+            const ayinIlkGunu = new Date(yil, ay, 1); let baslangicGunu = ayinIlkGunu.getDay(); if (baslangicGunu === 0) baslangicGunu = 7; 
+            const gunSayisi = new Date(yil, ay + 1, 0).getDate(); takvimHucreler.innerHTML = ''; 
+            for (let i = 1; i < baslangicGunu; i++) { const hucre = document.createElement('div'); hucre.classList.add('takvim-hucre', 'bos'); takvimHucreler.appendChild(hucre); }
             for (let i = 1; i <= gunSayisi; i++) {
-                const hucre = document.createElement('div');
-                hucre.classList.add('takvim-hucre', 'dolu');
-                hucre.textContent = i;
-
-                const oAnkiGun = new Date(yil, ay, i);
-                const tarihStr = tarihFormatla(oAnkiGun);
-
-                // Bugünün Tarihini İşaretle
-                if (oAnkiGun.toDateString() === bugun.toDateString()) {
-                    hucre.classList.add('bugun');
-                }
-                
-                // Seçilen Tarihi İşaretle
-                if (oAnkiGun.toDateString() === secilenTarih.toDateString()) {
-                     hucre.style.outline = `3px solid ${i === bugun.getDate() && ay === bugun.getMonth() ? 'white' : 'yellow'}`;
-                }
-
-                // Görev Olan Günleri İşaretle
-                if (gorevler[tarihStr] && gorevler[tarihStr].length > 0) {
-                    hucre.classList.add('gorevli');
-                }
-                
-                // Tıklama Olayı: Günü seç ve görevleri yükle
-                hucre.onclick = () => {
-                    secilenTarih = oAnkiGun;
-                    gorevleriYukle(tarihStr);
-                    takvimiOlustur(aktifTarih); // Seçim rengini yenile
-                };
-
+                const hucre = document.createElement('div'); hucre.classList.add('takvim-hucre', 'dolu'); hucre.textContent = i;
+                const oAnkiGun = new Date(yil, ay, i); const tarihStr = tarihFormatla(oAnkiGun);
+                if (oAnkiGun.toDateString() === bugun.toDateString()) { hucre.classList.add('bugun'); }
+                if (oAnkiGun.toDateString() === secilenTarih.toDateString()) { hucre.style.outline = `3px solid ${i === bugun.getDate() && ay === bugun.getMonth() ? 'white' : 'yellow'}`; }
+                if (gorevler[tarihStr] && gorevler[tarihStr].length > 0) { hucre.classList.add('gorevli'); }
+                hucre.onclick = () => { secilenTarih = oAnkiGun; gorevleriYukle(tarihStr); takvimiOlustur(aktifTarih); };
                 takvimHucreler.appendChild(hucre);
             }
-        }
-
-        function takvimiDegistir(delta) {
-            aktifTarih.setMonth(aktifTarih.getMonth() + delta);
-            takvimiOlustur(aktifTarih);
-        }
-
-        // ------------------------------------
-        // KRONOMETRE ve ZAMANLAYICI FONKSİYONLARI (Önceki koddan alınmıştır)
-        // ------------------------------------
-        let swInterval; let swRunning = false; let swElapsedTime = 0;
-        const swDisplay = document.getElementById('stopwatch-display');
-        const swStartBtn = document.getElementById('sw-start-btn');
-        const swPauseBtn = document.getElementById('sw-pause-btn');
+         }
+        function takvimiDegistir(delta) { aktifTarih.setMonth(aktifTarih.getMonth() + delta); takvimiOlustur(aktifTarih); }
         
-        function formatTime(ms) {
-            const totalSeconds = Math.floor(ms / 1000);
-            const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-            const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-            const seconds = String(totalSeconds % 60).padStart(2, '0');
-            return `${hours}:${minutes}:${seconds}`;
-        }
-        function formatSeconds(totalSeconds) { return formatTime(totalSeconds * 1000); }
+        // **************** KRONOMETRE VE ZAMANLAYICI ****************
+        let swInterval; let swRunning = false; let swElapsedTime = 0; const swDisplay = document.getElementById('stopwatch-display'); const swStartBtn = document.getElementById('sw-start-btn'); const swPauseBtn = document.getElementById('sw-pause-btn');
         function startStopwatch() { if (swRunning) return; swRunning = true; const swStartTime = Date.now() - swElapsedTime; swInterval = setInterval(() => { swElapsedTime = Date.now() - swStartTime; swDisplay.textContent = formatTime(swElapsedTime); }, 1000); swStartBtn.style.display = 'none'; swPauseBtn.style.display = 'inline-flex'; }
         function pauseStopwatch() { if (!swRunning) return; swRunning = false; clearInterval(swInterval); swStartBtn.style.display = 'inline-flex'; swPauseBtn.style.display = 'none'; }
         function resetStopwatch() { pauseStopwatch(); swElapsedTime = 0; swDisplay.textContent = formatTime(swElapsedTime); }
-        
-        let timerInterval; let timerRunning = false; let remainingSeconds = 300; let initialSeconds = 300;
-        const timerDisplay = document.getElementById('timer-display');
-        const timerStartBtn = document.getElementById('timer-start-btn');
-        const timerPauseBtn = document.getElementById('timer-pause-btn');
-        const hInput = document.getElementById('timer-hours');
-        const mInput = document.getElementById('timer-minutes');
-        const sInput = document.getElementById('timer-seconds');
-        
-        function updateRemainingTime() {
-            if (remainingSeconds <= 0) {
-                clearInterval(timerInterval); timerRunning = false; timerDisplay.textContent = "00:00:00"; 
-                alarmCal("Zamanlayıcı Geri Sayımı Sona Erdi!");
-                timerStartBtn.style.display = 'inline-flex'; timerPauseBtn.style.display = 'none';
-                return;
-            }
-            timerDisplay.textContent = formatSeconds(remainingSeconds);
-            remainingSeconds--;
-        }
-        function setInitialTime() {
-            const hours = parseInt(hInput.value) || 0; const minutes = parseInt(mInput.value) || 0; const seconds = parseInt(sInput.value) || 0;
-            const newTotalSeconds = (hours * 3600) + (minutes * 60) + seconds;
-            if (newTotalSeconds > 0) { initialSeconds = newTotalSeconds; remainingSeconds = newTotalSeconds; } 
-            else { initialSeconds = 300; remainingSeconds = 300; }
-            timerDisplay.textContent = formatSeconds(remainingSeconds);
-            timerStartBtn.style.display = 'inline-flex'; timerPauseBtn.style.display = 'none';
-        }
+        let timerInterval; let timerRunning = false; let remainingSeconds = 300; let initialSeconds = 300; const timerDisplay = document.getElementById('timer-display'); const timerStartBtn = document.getElementById('timer-start-btn'); const timerPauseBtn = document.getElementById('timer-pause-btn'); const hInput = document.getElementById('timer-hours'); const mInput = document.getElementById('timer-minutes'); const sInput = document.getElementById('timer-seconds');
+        function updateRemainingTime() { if (remainingSeconds <= 0) { clearInterval(timerInterval); timerRunning = false; timerDisplay.textContent = "00:00:00"; alarmCal("Zamanlayıcı Geri Sayımı Sona Erdi!"); timerStartBtn.style.display = 'inline-flex'; timerPauseBtn.style.display = 'none'; return; } timerDisplay.textContent = formatSeconds(remainingSeconds); remainingSeconds--; }
+        function setInitialTime() { const hours = parseInt(hInput.value) || 0; const minutes = parseInt(mInput.value) || 0; const seconds = parseInt(sInput.value) || 0; const newTotalSeconds = (hours * 3600) + (minutes * 60) + seconds; if (newTotalSeconds > 0) { initialSeconds = newTotalSeconds; remainingSeconds = newTotalSeconds; } else { initialSeconds = 300; remainingSeconds = 300; } timerDisplay.textContent = formatSeconds(remainingSeconds); timerStartBtn.style.display = 'inline-flex'; timerPauseBtn.style.display = 'none'; }
         [hInput, mInput, sInput].forEach(input => { input.addEventListener('input', () => { pauseTimer(); setInitialTime(); }); });
         function startTimer() { if (timerRunning) return; if (remainingSeconds <= 0) { setInitialTime(); if (remainingSeconds <= 0) return; } timerRunning = true; timerInterval = setInterval(updateRemainingTime, 1000); timerStartBtn.style.display = 'none'; timerPauseBtn.style.display = 'inline-flex'; }
         function pauseTimer() { if (!timerRunning) return; timerRunning = false; clearInterval(timerInterval); timerStartBtn.style.display = 'inline-flex'; timerPauseBtn.style.display = 'none'; }
         function resetTimer() { pauseTimer(); remainingSeconds = initialSeconds; timerDisplay.textContent = formatSeconds(remainingSeconds); hInput.value = Math.floor(initialSeconds / 3600); mInput.value = Math.floor((initialSeconds % 3600) / 60); sInput.value = initialSeconds % 60; }
         setInitialTime();
 
-        // ------------------------------------
-        // İLK BAŞLATMA İŞLEMLERİ
-        // ------------------------------------
+        // **************** İLK BAŞLATMA İŞLEMLERİ ****************
         saatiGuncelle();
         takvimiOlustur(aktifTarih); 
         gorevleriYukle(tarihFormatla(secilenTarih)); 
-        izinIste(); // Bildirim izni iste
-        alarmKontrolBaslat(); // Alarm kontrolünü başlat
+        izinIste(); 
+        alarmKontrolBaslat();
     </script>
 </body>
 </html>

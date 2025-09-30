@@ -3,40 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tam Özelleştirilebilir Yönetim Panosu</title>
+    <title>Tema Seçimli Yönetim Panosu</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
-        /* CSS STİLLERİ (GELİŞTİRİLMİŞ TEMA) */
+        /* CSS STİLLERİ (TEMA DEĞİŞKENLERİ) */
         :root {
-            /* Varsayılan tema renkleri (GitHub Dark benzeri) */
-            --bg-color: #0d1117; 
-            --text-color: #c9d1d9; 
-            --primary-color: #58a6ff; 
-            --secondary-color: #3fb950; 
-            --card-bg: #161b22; 
+            /* Varsayılan Tema (Deep Blue) */
+            --bg-color: #0a192f; 
+            --text-color: #ccd6f6; 
+            --primary-color: #64ffda; 
+            --secondary-color: #ccd6f6; 
+            --card-bg: #112240; 
             --border-color: #30363d;
-            --error-color: #cf6679;
+            --error-color: #ff6464;
         }
         
-        /* Tema Ayarları Yükleyici JS Bloğu */
+        /* Tema Yükleyici JS Bloğu - Sayfa yüklenmeden önce çalışır */
         (function () {
-            const savedTheme = localStorage.getItem('custom_theme_settings');
-            if (savedTheme) {
-                const settings = JSON.parse(savedTheme);
+            const THEMES = {
+                'deep-blue': { bgColor: '#0a192f', textColor: '#ccd6f6', primaryColor: '#64ffda', secondaryColor: '#ccd6f6', cardBg: '#112240', errorColor: '#ff6464' },
+                'red-matrix': { bgColor: '#000000', textColor: '#f0f0f0', primaryColor: '#ff4d4d', secondaryColor: '#ff4d4d', cardBg: '#111111', errorColor: '#ff0000' },
+                'light-mint': { bgColor: '#f0fff4', textColor: '#2f4f4f', primaryColor: '#3cb371', secondaryColor: '#6b8e23', cardBg: '#ffffff', errorColor: '#dc143c' }
+            };
+            const savedThemeName = localStorage.getItem('active_theme_name') || 'deep-blue';
+            const settings = THEMES[savedThemeName];
+            if (settings) {
                 const root = document.documentElement;
                 root.style.setProperty('--bg-color', settings.bgColor);
                 root.style.setProperty('--text-color', settings.textColor);
                 root.style.setProperty('--primary-color', settings.primaryColor);
                 root.style.setProperty('--secondary-color', settings.secondaryColor);
                 root.style.setProperty('--card-bg', settings.cardBg);
+                root.style.setProperty('--error-color', settings.errorColor);
             }
         })();
         
         /* Genel Stiller ve Geçişler */
         body { 
             font-family: 'Roboto', sans-serif; 
-            /* Dinamik arka plan: Hafif degrade ile derinlik katıldı */
-            background: linear-gradient(145deg, var(--bg-color), #010409); 
+            /* Hafif degrade ile derinlik */
+            background: linear-gradient(145deg, var(--bg-color), var(--card-bg)); 
             color: var(--text-color); 
             margin: 0; 
             padding: 0; 
@@ -48,13 +54,13 @@
         .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; min-height: 80vh; }
         .tab-content.active { display: block; }
         
-        /* KART GÖRÜNÜMÜ: Daha yumuşak gölgelendirme ve çerçeve */
+        /* KART GÖRÜNÜMÜ */
         .widget-card { 
             background-color: var(--card-bg); 
             padding: 25px; 
             margin-bottom: 20px; 
             border-radius: 12px; 
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7), 0 0 5px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(0, 0, 0, 0.2);
             border: 1px solid var(--border-color); 
             transition: all 0.5s ease-in-out; 
         }
@@ -85,19 +91,18 @@
         /* Zaman ve Ekran Stilleri */
         .display-large { 
             font-size: 2.5rem; text-align: center; 
-            color: var(--secondary-color); 
+            color: var(--primary-color); 
             margin-bottom: 15px; transition: color 0.5s; 
-            /* Ekstra parlaklık için yazı gölgesi */
-            text-shadow: 0 0 5px rgba(63, 185, 80, 0.5); 
+            text-shadow: 0 0 8px rgba(100, 255, 218, 0.7); 
         }
-        .timer-controls button, .gorev-ekle button { 
+        .timer-controls button, .gorev-ekle button, .theme-select-btn { 
             background-color: var(--primary-color); 
-            color: var(--bg-color); 
+            color: var(--card-bg); 
             border: none; padding: 10px 15px; border-radius: 6px; 
             cursor: pointer; transition: background-color 0.2s, transform 0.1s; 
             display: inline-flex; align-items: center; gap: 5px; font-weight: 500;
         }
-        .timer-controls button:hover, .gorev-ekle button:hover {
+        .timer-controls button:hover, .gorev-ekle button:hover, .theme-select-btn:hover {
             filter: brightness(1.1);
             transform: translateY(-1px);
         }
@@ -106,8 +111,8 @@
 
         /* Takvim ve Görev Stilleri */
         .takvim-baslik button {
-            background-color: var(--secondary-color);
-            color: var(--bg-color);
+            background-color: var(--primary-color);
+            color: var(--card-bg);
         }
         .takvim-baslik { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .takvim-gunler { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
@@ -120,21 +125,37 @@
         .gorevli { 
             border: 2px solid var(--error-color); 
             box-shadow: 0 0 5px var(--error-color); 
-            background-color: rgba(207, 102, 121, 0.1); 
+            background-color: var(--error-color, #ff6464)1A; /* Dinamik hata rengi */
         }
-        .gorev-item { border-left: 5px solid var(--secondary-color); background-color: var(--bg-color); padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .gorev-item { border-left: 5px solid var(--primary-color); background-color: var(--bg-color); padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
         .gorev-ekle { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
         .gorev-ekle input, #not-alani { padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); }
         #not-alani { width: 100%; height: 200px; box-sizing: border-box; resize: vertical; font-size: 1rem; }
         
-        /* Ayarlar Stilleri */
-        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
-        .setting-item { display: flex; flex-direction: column; gap: 10px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; }
-        .setting-item label { font-weight: 500; color: var(--primary-color); }
-        .setting-item input[type="color"] { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: none; border: none; width: 100%; height: 50px; padding: 0; cursor: pointer; border-radius: 6px; }
-        .setting-item input[type="color"]::-webkit-color-swatch { border: 1px solid var(--border-color); border-radius: 5px; }
-        .setting-item input[type="color"]::-moz-color-swatch { border: 1px solid var(--border-color); border-radius: 5px; }
-        .setting-item button { margin-top: auto; }
+        /* Ayarlar Stilleri (Yeni Tema Seçim Butonları) */
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; }
+        .theme-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .theme-card.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+        .theme-preview {
+            height: 50px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -145,7 +166,7 @@
             <div class="widget-card">
                 <h2>Anlık Saat ve Tarih</h2>
                 <div id="saat-gostergesi" class="display-large" style="font-size: 3.5rem;"></div>
-                <div id="tarih-gostergesi" style="text-align: center;"></div>
+                <div id="tarih-gostergesi" style="text-align: center; color: var(--secondary-color);"></div>
             </div>
         </div>
 
@@ -181,10 +202,10 @@
                 <h2>Takvim</h2>
                 <div class="takvim-baslik">
                     <button onclick="takvimiDegistir(-1)"> &lt; </button>
-                    <div id="takvim-ay-yil"></div>
+                    <div id="takvim-ay-yil" style="color: var(--secondary-color);"></div>
                     <button onclick="takvimiDegistir(1)"> &gt; </button>
                 </div>
-                <div class="takvim-gunler">
+                <div class="takvim-gunler" style="color: var(--secondary-color);">
                     <div class="takvim-gun">Pzt</div>
                     <div class="takvim-gun">Sal</div>
                     <div class="takvim-gun">Çar</div>
@@ -198,7 +219,7 @@
             </div>
 
             <div class="widget-card">
-                <h2>Seçilen Günün Görevleri (<span id="secilen-tarih-gostergesi">Bugün</span>)</h2>
+                <h2>Seçilen Günün Görevleri (<span id="secilen-tarih-gostergesi" style="color: var(--primary-color);">Bugün</span>)</h2>
                 <div class="gorev-ekle">
                     <input type="text" id="gorev-metni" placeholder="Görevi buraya yazın..." style="flex: 2;">
                     <input type="time" id="gorev-alarm-saati" value="09:00" style="width: 100px;">
@@ -218,33 +239,30 @@
 
         <div id="settings" class="tab-content">
             <div class="widget-card">
-                <h2>Tema ve Stil Ayarları</h2>
+                <h2>Hazır Tema Seçimi</h2>
                 <div class="settings-grid">
-                    <div class="setting-item">
-                        <label for="bg-color">Arka Plan Rengi</label>
-                        <input type="color" id="bg-color" data-css-var="--bg-color" oninput="temayiGuncelle(this.id, this.value)">
-                    </div>
-                    <div class="setting-item">
-                        <label for="card-bg">Kart Arka Plan Rengi</label>
-                        <input type="color" id="card-bg" data-css-var="--card-bg" oninput="temayiGuncelle(this.id, this.value)">
-                    </div>
-                    <div class="setting-item">
-                        <label for="primary-color">Ana Aksan Rengi</label>
-                        <input type="color" id="primary-color" data-css-var="--primary-color" oninput="temayiGuncelle(this.id, this.value)">
-                    </div>
-                    <div class="setting-item">
-                        <label for="secondary-color">İkincil Aksan Rengi</label>
-                        <input type="color" id="secondary-color" data-css-var="--secondary-color" oninput="temayiGuncelle(this.id, this.value)">
-                    </div>
-                    <div class="setting-item">
-                        <label for="text-color">Metin Rengi</label>
-                        <input type="color" id="text-color" data-css-var="--text-color" oninput="temayiGuncelle(this.id, this.value)">
-                    </div>
-                    <div class="setting-item">
-                        <button onclick="temayiSifirla()" style="background-color: var(--error-color);">
-                            <span class="material-symbols-outlined">settings_backup_restore</span> Varsayılana Sıfırla
+                    
+                    <div class="theme-card" data-theme="deep-blue">
+                        <div class="theme-preview" style="background-color: #0a192f; color: #64ffda; border-color: #64ffda;">Deep Blue</div>
+                        <button class="theme-select-btn" onclick="temayiUygula('deep-blue')">
+                            <span class="material-symbols-outlined">style</span> Deep Blue Uygula
                         </button>
                     </div>
+
+                    <div class="theme-card" data-theme="red-matrix">
+                        <div class="theme-preview" style="background-color: #000000; color: #ff4d4d; border-color: #ff4d4d;">Siyah Kırmızı (Matrix)</div>
+                        <button class="theme-select-btn" onclick="temayiUygula('red-matrix')">
+                            <span class="material-symbols-outlined">style</span> Siyah Kırmızı Uygula
+                        </button>
+                    </div>
+                    
+                    <div class="theme-card" data-theme="light-mint">
+                        <div class="theme-preview" style="background-color: #f0fff4; color: #3cb371; border-color: #3cb371;">Hafif Yeşil (Mint)</div>
+                        <button class="theme-select-btn" onclick="temayiUygula('light-mint')">
+                            <span class="material-symbols-outlined">style</span> Hafif Yeşil Uygula
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -263,9 +281,16 @@
         // **************** TEMEL DEĞİŞKENLER VE AYARLAR ****************
         const GOREV_KEY = 'minimal_koyu_gorevler';
         const NOT_KEY = 'minimal_koyu_notlar_v2';
-        const THEME_KEY = 'custom_theme_settings';
-        const DEFAULT_THEME = { bgColor: '#0d1117', textColor: '#c9d1d9', primaryColor: '#58a6ff', secondaryColor: '#3fb950', cardBg: '#161b22', };
+        const THEME_NAME_KEY = 'active_theme_name';
         
+        // TEMALARIN TANIMI
+        const THEMES = {
+            'deep-blue': { bgColor: '#0a192f', textColor: '#ccd6f6', primaryColor: '#64ffda', secondaryColor: '#ccd6f6', cardBg: '#112240', errorColor: '#ff6464' },
+            'red-matrix': { bgColor: '#000000', textColor: '#f0f0f0', primaryColor: '#ff4d4d', secondaryColor: '#ff4d4d', cardBg: '#111111', errorColor: '#ff0000' },
+            'light-mint': { bgColor: '#f0fff4', textColor: '#2f4f4f', primaryColor: '#3cb371', secondaryColor: '#6b8e23', cardBg: '#ffffff', errorColor: '#dc143c' }
+        };
+        const DEFAULT_THEME_NAME = 'deep-blue';
+
         let gorevler = JSON.parse(localStorage.getItem(GOREV_KEY)) || {};
         let aktifTarih = new Date(); 
         let secilenTarih = new Date(); 
@@ -277,42 +302,40 @@
         function formatTime(ms) { const totalSeconds = Math.floor(ms / 1000); const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0'); const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0'); const seconds = String(totalSeconds % 60).padStart(2, '0'); return `${hours}:${minutes}:${seconds}`; }
         function formatSeconds(totalSeconds) { return formatTime(totalSeconds * 1000); }
 
-        // **************** TEMA YÖNETİMİ ****************
+        // **************** TEMA YÖNETİMİ (Yeni) ****************
+        function temayiUygula(themeName) {
+            const settings = THEMES[themeName];
+            if (!settings) return;
+
+            const root = document.documentElement;
+            root.style.setProperty('--bg-color', settings.bgColor);
+            root.style.setProperty('--text-color', settings.textColor);
+            root.style.setProperty('--primary-color', settings.primaryColor);
+            root.style.setProperty('--secondary-color', settings.secondaryColor);
+            root.style.setProperty('--card-bg', settings.cardBg);
+            root.style.setProperty('--error-color', settings.errorColor);
+
+            localStorage.setItem(THEME_NAME_KEY, themeName);
+            temayiAktifGoster(themeName); 
+        }
+
+        function temayiAktifGoster(activeThemeName) {
+            document.querySelectorAll('.theme-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.getAttribute('data-theme') === activeThemeName) {
+                    card.classList.add('active');
+                }
+            });
+        }
+        
         function temayiYukle() {
-            const saved = JSON.parse(localStorage.getItem(THEME_KEY)) || DEFAULT_THEME;
-            const root = document.documentElement;
-            root.style.setProperty('--bg-color', saved.bgColor);
-            root.style.setProperty('--text-color', saved.textColor);
-            root.style.setProperty('--primary-color', saved.primaryColor);
-            root.style.setProperty('--secondary-color', saved.secondaryColor);
-            root.style.setProperty('--card-bg', saved.cardBg);
-
-            if (document.getElementById('bg-color')) {
-                document.getElementById('bg-color').value = saved.bgColor;
-                document.getElementById('text-color').value = saved.textColor;
-                document.getElementById('primary-color').value = saved.primaryColor;
-                document.getElementById('secondary-color').value = saved.secondaryColor;
-                document.getElementById('card-bg').value = saved.cardBg;
-            }
+            const savedThemeName = localStorage.getItem(THEME_NAME_KEY) || DEFAULT_THEME_NAME;
+            temayiUygula(savedThemeName);
         }
-        function temayiGuncelle(elementId, value) {
-            const root = document.documentElement;
-            const cssVar = document.getElementById(elementId).getAttribute('data-css-var');
-            root.style.setProperty(cssVar, value);
-
-            const current = JSON.parse(localStorage.getItem(THEME_KEY)) || DEFAULT_THEME;
-            const keyMap = { 'bg-color': 'bgColor', 'text-color': 'textColor', 'primary-color': 'primaryColor', 'secondary-color': 'secondaryColor', 'card-bg': 'cardBg' };
-            if (keyMap[elementId]) {
-                 current[keyMap[elementId]] = value;
-                 localStorage.setItem(THEME_KEY, JSON.stringify(current));
-            }
-        }
-        function temayiSifirla() { 
-            localStorage.setItem(THEME_KEY, JSON.stringify(DEFAULT_THEME)); // Varsayılan değerleri kaydet
-            temayiYukle(); 
-            alert("Tema varsayılan GitHub Dark stiline sıfırlandı."); 
-        }
+        
         window.addEventListener('load', temayiYukle);
+        // Sayfa yüklendikten sonra aktif temayı ayarlar sekmesinde işaretle
+        window.addEventListener('load', () => temayiAktifGoster(localStorage.getItem(THEME_NAME_KEY) || DEFAULT_THEME_NAME));
 
         // **************** SEKMELER VE GENEL KONTROL ****************
         function gosterSekme(tabId) { 
@@ -384,7 +407,7 @@
                 const hucre = document.createElement('div'); hucre.classList.add('takvim-hucre', 'dolu'); hucre.textContent = i;
                 const oAnkiGun = new Date(yil, ay, i); const tarihStr = tarihFormatla(oAnkiGun);
                 if (oAnkiGun.toDateString() === bugun.toDateString()) { hucre.classList.add('bugun'); }
-                if (oAnkiGun.toDateString() === secilenTarih.toDateString()) { hucre.style.outline = `3px solid ${i === bugun.getDate() && ay === bugun.getMonth() ? 'white' : 'yellow'}`; }
+                if (oAnkiGun.toDateString() === secilenTarih.toDateString()) { hucre.style.outline = `3px solid ${i === bugun.getDate() && ay === bugun.getMonth() ? 'var(--text-color)' : 'var(--primary-color)'}`; }
                 if (gorevler[tarihStr] && gorevler[tarihStr].length > 0) { hucre.classList.add('gorevli'); }
                 hucre.onclick = () => { secilenTarih = oAnkiGun; gorevleriYukle(tarihStr); takvimiOlustur(aktifTarih); };
                 takvimHucreler.appendChild(hucre);
